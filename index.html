@@ -387,10 +387,14 @@
         method: 'POST',
         body: formData
       })
-      .then(response => response.text())
+      .then(response => response.json())
       .then(data => {
-        showToast('¡Gracias por tu mensaje! Te contactaremos pronto.', 'success');
-        this.reset();
+        if (data.success) {
+          showToast(data.message || '¡Gracias por tu mensaje! Te contactaremos pronto.', 'success');
+          this.reset();
+        } else {
+          showToast(data.message || 'Hubo un error al enviar el mensaje.', 'error');
+        }
       })
       .catch(error => {
         showToast('Hubo un error al enviar el mensaje. Intenta nuevamente.', 'error');
