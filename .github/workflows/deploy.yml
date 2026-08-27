@@ -21,6 +21,10 @@ jobs:
         run: |
           mkdir -p /tmp/deploy
           rsync -a --exclude='.git' --exclude='.github' --exclude='node_modules' --exclude='.gitignore' ./ /tmp/deploy/
+          echo "=== Archivos a subir ==="
+          find /tmp/deploy -type f | sort
+          echo "=== Cantidad de archivos ==="
+          find /tmp/deploy -type f | wc -l
 
       - name: Deploy to FTP (explicit TLS)
         env:
@@ -29,11 +33,17 @@ jobs:
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
           FTP_DIR: ${{ secrets.FTP_DIR }}
         run: |
-          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" "$FTP_SERVER" <<EOF
+          echo "=== Conectando a $FTP_SERVER en $FTP_DIR ==="
+          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" "$FTP_SERVER" <<'EOF'
           set ssl:verify-certificate no
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
+          set cmd:fail-exit true
+          set net:timeout 30
+          set net:max-retries 1
           cd "$FTP_DIR"
-          mirror -R /tmp/deploy ./
+          pwd
+          mirror -R --verbose /tmp/deploy ./
           bye
           EOF
+          echo "=== Resultado: $? ==="
