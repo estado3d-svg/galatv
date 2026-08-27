@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#050505">
   <title>Gala TV Streaming</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="styles.css?v=16">
+  <link rel="stylesheet" href="styles.css?v=17">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -63,7 +63,7 @@
       </div>
 
       <div class="player-wrap">
-        <div class="live-tag" data-i18n="EN VIVO">EN VIVO</div>
+        <div class="live-tag off" id="liveTag">OFFLINE</div>
         <img class="hero-image" src="base.png" alt="Transmisión en vivo" id="heroImage">
         <iframe class="hero-video" id="heroVideo" src="https://www.youtube.com/embed/live_stream?channel=UCNbKWLI2_ivAZIAQQ5ot6Ng&autoplay=1&mute=0" title="Transmisión en vivo GalaTV" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="display:none"></iframe>
       </div>
@@ -364,7 +364,7 @@
           el.textContent = '0';
           if (heroVideo) heroVideo.style.display = 'none';
           if (heroImage) heroImage.style.display = 'block';
-          if (liveTag) liveTag.classList.add('off');
+          if (liveTag) { liveTag.classList.add('off'); liveTag.textContent = 'OFFLINE'; }
 
           // Buscar el último video publicado del canal para usar su miniatura
           try {
@@ -392,7 +392,7 @@
         // Hay transmisión: mostrar video, restaurar imagen original al volver
         if (heroImage) { heroImage.src = 'base.png'; heroImage.style.cursor = 'default'; heroImage.onclick = null; heroImage.style.display = 'none'; }
         if (heroVideo) heroVideo.style.display = 'block';
-        if (liveTag) liveTag.classList.remove('off');
+        if (liveTag) { liveTag.classList.remove('off'); liveTag.textContent = 'EN VIVO'; }
 
         if (viewers > 0) {
           el.textContent = '+' + (viewers >= 1000 ? (viewers/1000).toFixed(1) + 'K' : viewers);
@@ -401,6 +401,7 @@
         }
       } catch (err) {
         el.textContent = '0';
+        if (liveTag) { liveTag.classList.add('off'); liveTag.textContent = 'OFFLINE'; }
       }
     }
 
