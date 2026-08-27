@@ -10,7 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lftp curl
 
       - name: Deploy to FTP
         run: |
@@ -18,10 +23,6 @@ jobs:
           echo "Server: ${{ secrets.FTP_SERVER }}"
           echo "Directory: ${{ secrets.FTP_DIR }}"
           
-          # Instalar lftp
-          sudo apt-get update
-          sudo apt-get install -y lftp curl
-
           # Crear carpeta temporal
           mkdir -p /tmp/galatv-deploy
           cp -r . /tmp/galatv-deploy/ --exclude='.git' --exclude='.github' --exclude='node_modules'
