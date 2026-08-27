@@ -44,12 +44,19 @@ try {
     </body></html>
     ";
 
+    // El From DEBE ser una dirección del dominio real para que pase los filtros antispam
+    $from = "no-reply@galatv.com.ar";
+
     $headers  = "MIME-Version: 1.0\r\n";
     $headers .= "Content-type:text/html;charset=UTF-8\r\n";
-    $headers .= "From: GalaTV <no-reply@c2642305.ferozo.com>\r\n";
+    $headers .= "From: GalaTV <{$from}>\r\n";
     $headers .= "Reply-To: {$email}\r\n";
+    $headers .= "Return-Path: <{$from}>\r\n";
+    $headers .= "X-Mailer: PHP/" . phpversion() . "\r\n";
+    $headers .= "X-Priority: 3\r\n";
 
-    $sent = @mail($to, $subject, $body, $headers);
+    // Agregar parámetros para el envelope (evita "From" falso rechazado por el servidor)
+    $sent = @mail($to, $subject, $body, $headers, "-f" . $from);
 
     // Guardar log del intento
     $logEntry = sprintf(
