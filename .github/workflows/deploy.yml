@@ -34,7 +34,7 @@ jobs:
           FTP_DIR: ${{ secrets.FTP_DIR }}
         run: |
           echo "=== Conectando a $FTP_SERVER en $FTP_DIR ==="
-          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" "$FTP_SERVER" <<'EOF'
+          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" "$FTP_SERVER" <<'EOF' 2>&1 | tee /tmp/lftp.log
           set ssl:verify-certificate no
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
@@ -46,4 +46,10 @@ jobs:
           mirror -R --verbose /tmp/deploy ./
           bye
           EOF
-          echo "=== Resultado: $? ==="
+          EXIT_CODE=${PIPESTATUS[0]}
+          echo ""
+          echo "=== SALIDA COMPLETA de lftp ==="
+          cat /tmp/lftp.log
+          echo ""
+          echo "=== Exit code: $EXIT_CODE ==="
+          exit $EXIT_CODE
