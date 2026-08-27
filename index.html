@@ -405,10 +405,10 @@
       }
     }
 
-    // Actualizar cada 30 segundos
+    // Actualizar cada 5 minutos (para no agotar la cuota de la API: ~4 unidades/consulta)
     if (YOUTUBE_API_KEY !== 'COLOCA_TU_API_KEY_AQUI') {
       fetchLiveViewers();
-      setInterval(fetchLiveViewers, 30000);
+      setInterval(fetchLiveViewers, 300000);
     }
   </script>
   
