@@ -143,25 +143,30 @@
             <p data-i18n="CONECTA TU MARCA">Conecta tu marca con miles de espectadores</p>
           </div>
           
-          <form id="contactForm" class="contact-form">
+          <form id="contactForm" class="contact-form" action="contact.php" method="POST">
             <div class="form-group">
-              <label for="name" data-i18n="NOMBRE">NOMBRE</label>
-              <input type="text" id="name" name="name" required placeholder="Tu nombre">
+              <label for="nombre" data-i18n="NOMBRE">NOMBRE</label>
+              <input type="text" id="nombre" name="nombre" required placeholder="${t('PLACEHOLDER_NAME')}">
             </div>
             
             <div class="form-group">
               <label for="email" data-i18n="EMAIL">EMAIL</label>
-              <input type="email" id="email" name="email" required placeholder="tucorreo@ejemplo.com">
+              <input type="email" id="email" name="email" required placeholder="${t('PLACEHOLDER_EMAIL')}">
             </div>
             
             <div class="form-group">
-              <label for="company" data-i18n="EMPRESA">EMPRESA</label>
-              <input type="text" id="company" name="company" placeholder="Nombre de tu empresa">
+              <label for="telefono" data-i18n="TELEFONO">TELEFONO</label>
+              <input type="tel" id="telefono" name="telefono" placeholder="${t('PLACEHOLDER_PHONE')}">
             </div>
             
             <div class="form-group">
-              <label for="message" data-i18n="MENSAJE">MENSAJE</label>
-              <textarea id="message" name="message" rows="4" required placeholder="Cuéntanos cómo podemos ayudarte..."></textarea>
+              <label for="asunto" data-i18n="ASUNTO">ASUNTO</label>
+              <input type="text" id="asunto" name="asunto" placeholder="${t('PLACEHOLDER_SUBJECT')}">
+            </div>
+            
+            <div class="form-group">
+              <label for="mensaje" data-i18n="MENSAJE">MENSAJE</label>
+              <textarea id="mensaje" name="mensaje" rows="4" required placeholder="${t('PLACEHOLDER_MESSAGE')}"></textarea>
             </div>
             
             <button type="submit" class="btn-submit" data-i18n="ENVIAR">ENVIAR MENSAJE</button>
@@ -282,13 +287,20 @@
         'COPYRIGHT': '© 2026 GalaTV. Todos los derechos reservados.',
         'ES': 'ES',
         'PUBLICITA AQUÍ': 'ADVERTISE HERE',
+        'PHONE': 'TELÉFONO',
+        'PLACEHOLDER_NAME': 'Tu nombre',
+        'PLACEHOLDER_EMAIL': 'tucorreo@ejemplo.com',
+        'PLACEHOLDER_PHONE': 'Tu teléfono',
+        'PLACEHOLDER_SUBJECT': 'Asunto',
+        'PLACEHOLDER_MESSAGE': 'Cuéntanos cómo podemos ayudarte...'
         'CONECTA TU MARCA': 'Connect your brand with thousands of viewers',
         'ESPACIO PUBLICITARIO': 'ADVERTISING SPACE',
         'ANUNCIA TU MARCA': 'Advertise your brand',
         'PUBLICIDAD EN GALATV': 'ADVERTISING ON GALATV',
         'NOMBRE': 'NAME',
         'EMAIL': 'EMAIL',
-        'EMPRESA': 'COMPANY',
+        'TELEFONO': 'PHONE NUMBER',
+        'ASUNTO': 'SUBJECT',
         'MENSAJE': 'MESSAGE',
         'ENVIAR': 'SEND MESSAGE',
         'ALCANCE': 'REACH',
@@ -298,7 +310,14 @@
         'SEGURIDAD': 'SECURITY',
         'PROTECCION DE DATOS': 'Data protection guaranteed',
         'COPYRIGHT': '© 2026 GalaTV. All rights reserved.',
-        'EN': 'EN'
+        'EN': 'EN',
+        'PHONE': 'PHONE NUMBER',
+        'SUBJECT': 'SUBJECT',
+        'PLACEHOLDER_NAME': 'Your name',
+        'PLACEHOLDER_EMAIL': 'your@email.com',
+        'PLACEHOLDER_PHONE': 'Your phone',
+        'PLACEHOLDER_SUBJECT': 'Subject',
+        'PLACEHOLDER_MESSAGE': 'Tell us how we can help you...'
       }
     };
     
@@ -312,6 +331,22 @@
           el.innerHTML = translations[currentLang][key];
         }
       });
+      
+      // Update placeholders
+      const placeholderMap = {
+        'nombre': 'PLACEHOLDER_NAME',
+        'email': 'PLACEHOLDER_EMAIL',
+        'telefono': 'PLACEHOLDER_PHONE',
+        'asunto': 'PLACEHOLDER_SUBJECT',
+        'mensaje': 'PLACEHOLDER_MESSAGE'
+      };
+      
+      for (const [field, key] of Object.entries(placeholderMap)) {
+        const el = document.getElementById(field);
+        if (el && translations[currentLang][key]) {
+          el.placeholder = translations[currentLang][key];
+        }
+      }
       
       // Update copyright text
       const copyrightEl = document.querySelector('.copyright');
@@ -328,7 +363,7 @@
     document.getElementById('langSelect').value = currentLang;
   </script>
   
-  <script>
+   <script>
     // Form submission handler
     document.getElementById('contactForm').addEventListener('submit', function(e) {
       e.preventDefault();
@@ -337,11 +372,29 @@
       const formData = new FormData(this);
       const data = Object.fromEntries(formData);
       
-      // Show success message
-      showToast('¡Gracias por tu mensaje! Te contactaremos pronto.', 'success');
+      // Show loading state
+      const submitBtn = this.querySelector('.btn-submit');
+      const originalText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = currentLang === 'es' ? 'ENVIANDO...' : 'SENDING...';
       
-      // Reset form
-      this.reset();
+      // Submit to PHP
+      fetch('contacto.php', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.text())
+      .then(data => {
+        showToast('¡Gracias por tu mensaje! Te contactaremos pronto.', 'success');
+        this.reset();
+      })
+      .catch(error => {
+        showToast('Hubo un error al enviar el mensaje. Intenta nuevamente.', 'error');
+      })
+      .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      });
     });
     
     // Toast notification
