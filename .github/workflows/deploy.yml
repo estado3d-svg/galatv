@@ -13,12 +13,11 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Deploy to FTP
-        uses: valery-didenko/ftp-deploy-action@v1.0.4
+        uses: SamKirkland/FTP-Deploy-Action@v3
         with:
-          ftp-server: ${{ secrets.FTP_SERVER }}
-          ftp-username: ${{ secrets.FTP_USERNAME }}
-          ftp-password: ${{ secrets.FTP_PASSWORD }}
-          ftp-port: 21
-          local-dir: .
-          remote-dir: /public_html
-          exclude: ['.git', '.github', 'node_modules', '.DS_Store', '*.log']
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-root: ./
+          remote-root: /
+          protocol: ftps
