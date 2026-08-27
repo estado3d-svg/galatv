@@ -146,27 +146,27 @@
           <form id="contactForm" class="contact-form" action="contact.php" method="POST">
             <div class="form-group">
               <label for="nombre" data-i18n="NOMBRE">NOMBRE</label>
-              <input type="text" id="nombre" name="nombre" required placeholder="${t('PLACEHOLDER_NAME')}">
+              <input type="text" id="nombre" name="nombre" required placeholder={`\${t('PLACEHOLDER_NAME')}`}">
             </div>
             
             <div class="form-group">
               <label for="email" data-i18n="EMAIL">EMAIL</label>
-              <input type="email" id="email" name="email" required placeholder="${t('PLACEHOLDER_EMAIL')}">
+              <input type="email" id="email" name="email" required placeholder={`\${t('PLACEHOLDER_EMAIL')}`}">
             </div>
             
             <div class="form-group">
               <label for="telefono" data-i18n="TELEFONO">TELEFONO</label>
-              <input type="tel" id="telefono" name="telefono" placeholder="${t('PLACEHOLDER_PHONE')}">
+              <input type="tel" id="telefono" name="telefono" placeholder={`\${t('PLACEHOLDER_PHONE')}`}">
             </div>
             
             <div class="form-group">
               <label for="asunto" data-i18n="ASUNTO">ASUNTO</label>
-              <input type="text" id="asunto" name="asunto" placeholder="${t('PLACEHOLDER_SUBJECT')}">
+              <input type="text" id="asunto" name="asunto" placeholder={`\${t('PLACEHOLDER_SUBJECT')}`}">
             </div>
             
             <div class="form-group">
               <label for="mensaje" data-i18n="MENSAJE">MENSAJE</label>
-              <textarea id="mensaje" name="mensaje" rows="4" required placeholder="${t('PLACEHOLDER_MESSAGE')}"></textarea>
+              <textarea id="mensaje" name="mensaje" rows="4" required placeholder={`\${t('PLACEHOLDER_MESSAGE')}`}"></textarea>
             </div>
             
             <button type="submit" class="btn-submit" data-i18n="ENVIAR">ENVIAR MENSAJE</button>
@@ -320,6 +320,10 @@
         'PLACEHOLDER_MESSAGE': 'Tell us how we can help you...'
       }
     };
+    
+    function t(key) {
+      return currentLang === 'es' ? translations['ES'][key] : translations['EN'][key];
+    }
     
     function changeLanguage(lang) {
       currentLang = lang;
