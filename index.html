@@ -62,7 +62,8 @@
 
       <div class="player-wrap">
         <div class="live-tag" data-i18n="EN VIVO">EN VIVO</div>
-        <iframe class="hero-video" src="https://www.youtube.com/embed/live_stream?channel=UCNbKWLI2_ivAZIAQQ5ot6Ng&autoplay=1&mute=0" title="Transmisión en vivo GalaTV" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        <img class="hero-image" src="base.jpeg" alt="Transmisión en vivo" id="heroImage">
+        <iframe class="hero-video" id="heroVideo" src="https://www.youtube.com/embed/live_stream?channel=UCNbKWLI2_ivAZIAQQ5ot6Ng&autoplay=1&mute=0" title="Transmisión en vivo GalaTV" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="display:none"></iframe>
       </div>
 
       <aside class="features">
@@ -366,6 +367,8 @@
 
     async function fetchLiveViewers() {
       const el = document.getElementById('liveViewers');
+      const heroImage = document.getElementById('heroImage');
+      const heroVideo = document.getElementById('heroVideo');
       try {
         // 1. Obtener el ID del canal a partir del handle
         const chRes = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=id&forHandle=${encodeURIComponent(YOUTUBE_CHANNEL_HANDLE)}&key=${YOUTUBE_API_KEY}`);
@@ -378,7 +381,10 @@
         const sData = await sRes.json();
         const liveVideoId = sData?.items?.[0]?.id?.videoId;
         if (!liveVideoId) {
+          // No hay transmisión: mostrar imagen, ocultar video
           el.textContent = '0';
+          if (heroImage) heroImage.style.display = 'block';
+          if (heroVideo) heroVideo.style.display = 'none';
           return;
         }
 
@@ -387,10 +393,14 @@
         const vData = await vRes.json();
         const viewers = parseInt(vData?.items?.[0]?.liveStreamingDetails?.concurrentViewers || 0);
 
+        // Hay transmisión: mostrar video, ocultar imagen
+        if (heroImage) heroImage.style.display = 'none';
+        if (heroVideo) heroVideo.style.display = 'block';
+
         if (viewers > 0) {
           el.textContent = '+' + (viewers >= 1000 ? (viewers/1000).toFixed(1) + 'K' : viewers);
         } else {
-          el.textContent = '0';
+          el.textContent = '...';
         }
       } catch (err) {
         el.textContent = '0';
