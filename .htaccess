@@ -3,15 +3,17 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^contacto$ contacto.php [L]
 
-# Proteger archivos sensibles
+# Proteger archivos sensibles (sintaxis compatible Apache 2.2 y 2.4)
 <FilesMatch "^(mail-config\.php|contact-log\.txt|error-log\.txt)$">
-  Require all denied
+  Order Allow,Deny
+  Deny from all
 </FilesMatch>
 
-# Bloquear archivos .log
-<Files "*.log">
-  Require all denied
-</Files>
+# Bloquear acceso a archivos de log
+<FilesMatch "\.(log|env|ini)$">
+  Order Allow,Deny
+  Deny from all
+</FilesMatch>
 
 # Prevenir listado de directorios
 Options -Indexes
