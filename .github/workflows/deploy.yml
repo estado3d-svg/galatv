@@ -12,44 +12,39 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      - name: Install lftp
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq lftp
-
       - name: Prepare files
         run: |
           mkdir -p /tmp/deploy
-          rsync -a --exclude='.git' --exclude='.github' --exclude='node_modules' --exclude='.gitignore' ./ /tmp/deploy/
+          rsync -a --exclude='.git' --exclude='.github' --exclude='node_modules' --exclude='.gitignore' --exclude='*.log' ./ /tmp/deploy/
           echo "=== Archivos a subir ==="
           find /tmp/deploy -type f | sort
-          echo "=== Cantidad de archivos ==="
+          echo "=== Cantidad: ==="
           find /tmp/deploy -type f | wc -l
 
-      - name: Deploy to FTP (explicit TLS)
+      - name: Deploy to FTP (explicit TLS via curl)
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
           FTP_DIR: ${{ secrets.FTP_DIR }}
         run: |
+          set -e
           echo "=== Conectando a $FTP_SERVER en $FTP_DIR ==="
-          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" "$FTP_SERVER" <<'EOF' 2>&1 | tee /tmp/lftp.log
-          set ssl:verify-certificate no
-          set ftp:ssl-force true
-          set ftp:ssl-protect-data true
-          set cmd:fail-exit true
-          set net:timeout 30
-          set net:max-retries 1
-          cd "$FTP_DIR"
-          pwd
-          mirror -R --verbose /tmp/deploy ./
-          bye
-          EOF
-          EXIT_CODE=${PIPESTATUS[0]}
-          echo ""
-          echo "=== SALIDA COMPLETA de lftp ==="
-          cat /tmp/lftp.log
-          echo ""
-          echo "=== Exit code: $EXIT_CODE ==="
-          exit $EXIT_CODE
+          cd /tmp/deploy
+          FAIL=0
+          find . -type f -print0 | while IFS= read -r -d '' file; do
+            rel="${file#./}"
+            echo "Subiendo: $rel"
+            if ! curl --ssl-reqd --ftp-create-dirs \
+              --user "$FTP_USERNAME:$FTP_PASSWORD" \
+              --upload-file "$file" \
+              "ftp://$FTP_SERVER$FTP_DIR/$rel"; then
+              echo "ERROR subiendo $rel"
+              FAIL=1
+            fi
+          done
+          if [ "$FAIL" = "1" ]; then
+            echo "=== HUBO ERRORES ==="
+            exit 1
+          fi
+          echo "=== DEPLOY OK ==="
