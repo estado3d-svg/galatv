@@ -55,8 +55,18 @@ try {
     $headers .= "X-Mailer: PHP/" . phpversion() . "\r\n";
     $headers .= "X-Priority: 3\r\n";
 
-    // Agregar parámetros para el envelope (evita "From" falso rechazado por el servidor)
-    $sent = @mail($to, $subject, $body, $headers, "-f" . $from);
+    // Enviar correo (sin "-f": Ferozo puede bloquear el parámetro y dar error 500)
+    $sent = @mail($to, $subject, $body, $headers);
+
+    // Log detallado del resultado
+    $logEntry2 = sprintf(
+        "[%s] mail() devolvio: %s | ultimo_error: %s | a: %s\n",
+        date('Y-m-d H:i:s'),
+        var_export($sent, true),
+        error_get_last() ? error_get_last()['message'] : 'sin error',
+        $to
+    );
+    @file_put_contents(__DIR__ . '/error-log.txt', $logEntry2, FILE_APPEND);
 
     // Guardar log del intento
     $logEntry = sprintf(
