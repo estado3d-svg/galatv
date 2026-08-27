@@ -117,7 +117,7 @@ button{cursor:pointer}
 .arrows button{width:32px;height:32px;border-radius:50%;border:1px solid #4a3b14;background:#060606;color:#e5b932;font-size:24px;line-height:1}
 .schedule-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 .program-card{min-width:0;background:#070707;border:1px solid #2b2412;border-radius:6px;padding-bottom:7px;overflow:hidden;position:relative}
-.ad-banner-img{width:100%;height:150px;object-fit:cover;border-radius:6px;cursor:pointer;display:block;border:1px solid #2b2412}
+.ad-banner-img{width:333px;max-width:100%;height:150px;object-fit:cover;border-radius:6px;cursor:pointer;display:block;border:1px solid #2b2412}
 .thumb{height:99px;position:relative;overflow:hidden}
 .thumb img{width:100%;height:100%;object-fit:cover}
 .thumb>span{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.55);border:1px solid #777;display:grid;place-items:center;color:#fff;font-size:14px}
