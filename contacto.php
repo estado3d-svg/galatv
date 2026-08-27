@@ -25,19 +25,22 @@ try {
     $mail = new PHPMailer(true);
 
     // SMTP
+    // Cargar configuración SMTP desde archivo seguro (protegido por .htaccess)
+    require_once __DIR__ . '/mail-config.php';
+
     $mail->isSMTP();
-    $mail->Host       = 'mail.galatv.com.ar';
+    $mail->Host       = MAIL_SMTP_HOST;
     $mail->SMTPAuth   = true;
-    $mail->Username   = 'contacto@galatv.com.ar';
-    $mail->Password   = 'Vph4N*Di';
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-    $mail->Port       = 587;
+    $mail->Username   = MAIL_SMTP_USER;
+    $mail->Password   = MAIL_SMTP_PASS;
+    $mail->SMTPSecure = MAIL_SMTP_SECURE === 'ssl' ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->Port       = MAIL_SMTP_PORT;
     $mail->CharSet    = 'UTF-8';
 
     // Remitente y destinatario
-    $mail->setFrom('contacto@galatv.com.ar', 'GalaTV');
+    $mail->setFrom(MAIL_FROM, 'GalaTV');
     $mail->addReplyTo($email, $nombre);
-    $mail->addAddress('bodorola@gmail.com', 'GalaTV Contacto');
+    $mail->addAddress(MAIL_TO, 'GalaTV Contacto');
 
     $mail->Subject = $asunto !== '' ? "GalaTV: $asunto" : "Nuevo mensaje desde GalaTV";
 

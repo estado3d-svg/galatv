@@ -2,3 +2,16 @@ RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^contacto$ contacto.php [L]
+
+# Proteger archivos sensibles
+<FilesMatch "^(mail-config\.php|contact-log\.txt|error-log\.txt)$">
+  Require all denied
+</FilesMatch>
+
+# Bloquear archivos .log
+<Files "*.log">
+  Require all denied
+</Files>
+
+# Prevenir listado de directorios
+Options -Indexes
