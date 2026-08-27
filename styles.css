@@ -113,13 +113,16 @@ button{cursor:pointer}
 .schedule{max-width:1510px;margin:15px auto 0;padding:0 36px 20px}
 .section-head{display:flex;justify-content:space-between;align-items:center}
 .section-head h3{font-size:16px;font-weight:400;margin:0 0 10px}
-.ad-banner{text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:12px;font-weight:bold;letter-spacing:1px;color:#0a0a0a;background:linear-gradient(135deg,#FFD700,#FFA500,#FFD700);padding:10px 20px;border-radius:6px;box-shadow:0 0 15px rgba(255,215,0,.35);transition:transform .2s,box-shadow .2s;margin-bottom:10px}
-.ad-banner:hover{transform:translateY(-2px);box-shadow:0 0 22px rgba(255,215,0,.55)}
-.ad-banner::before{content:"📢";font-size:14px}
+.ad-banner{text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:bold;letter-spacing:1px;color:#FFD700;background:linear-gradient(135deg,#1a1a1a,#0d0d0d);border:1px solid #FFD700;padding:14px 20px;border-radius:6px;box-shadow:0 0 15px rgba(255,215,0,.25);transition:transform .2s,box-shadow .2s;margin-bottom:10px;min-height:149px;flex-direction:column}
+.ad-banner:hover{transform:translateY(-2px);box-shadow:0 0 22px rgba(255,215,0,.5)}
+.ad-banner::before{content:"📢";font-size:20px;margin-bottom:6px}
 .arrows{display:flex;gap:8px}
 .arrows button{width:32px;height:32px;border-radius:50%;border:1px solid #4a3b14;background:#060606;color:#e5b932;font-size:24px;line-height:1}
 .schedule-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 .program-card{min-width:0;background:#070707;border:1px solid #2b2412;border-radius:6px;padding-bottom:7px;overflow:hidden;position:relative}
+a.program-card{text-decoration:none;color:inherit;display:block}
+.program-card.ad-card{cursor:pointer;transition:transform .2s,box-shadow .2s}
+.program-card.ad-card:hover{transform:translateY(-2px);box-shadow:0 4px 18px rgba(255,215,0,.25)}
 
 /* Ad card in schedule grid - same style as regular cards */
 .program-card.ad-card{background:#070707;border:1px solid #2b2412;border-radius:6px;padding-bottom:7px;overflow:hidden;position:relative}
