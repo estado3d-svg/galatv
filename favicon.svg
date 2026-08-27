@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFA500;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFD700;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <circle cx="32" cy="32" r="32" fill="#0a0a0a"/>
+  
+  <!-- Outer ring -->
+  <circle cx="32" cy="32" r="28" fill="none" stroke="url(#goldGrad)" stroke-width="2" opacity="0.6"/>
+  
+  <!-- Inner gold circle -->
+  <circle cx="32" cy="32" r="18" fill="none" stroke="url(#goldGrad)" stroke-width="3" opacity="0.9"/>
+  
+  <!-- Play button -->
+  <circle cx="32" cy="32" r="14" fill="#0a0a0a"/>
+  <polygon points="22,26 32,38 42,26" fill="url(#goldGrad)" filter="url(#glow)"/>
+  
+  <!-- "TV" text -->
+  <text x="32" y="48" text-anchor="middle" fill="url(#goldGrad)" font-size="10" font-weight="bold" letter-spacing="1" filter="url(#glow)" style="font-family:'Arial Black',sans-serif">TV</text>
+</svg>
