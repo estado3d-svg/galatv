@@ -151,6 +151,7 @@ button{cursor:pointer}
   .features{display:none}.benefits{grid-template-columns:1fr 1fr;margin:15px;border-radius:6px}
   .benefits>div{height:65px}.benefits>div:nth-child(2){border-right:0}.benefits span{font-size:25px}
   .schedule{padding:0 15px}.schedule-grid{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px}
+  .golden-grid,.golden-overlay{display:none!important}
 
 /* Golden light trails/stars overlay */
 .golden-overlay{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:-1}
