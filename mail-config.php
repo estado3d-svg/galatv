@@ -1,8 +1,8 @@
 <?php
-// Configuración SMTP - NO subir credenciales en texto plano en archivos públicos
-// Este archivo está protegido por .htaccess para que no sea accesible desde la web
+// Configuración SMTP - archivo protegido por .htaccess
+// Usamos la IP del servidor de correo para evitar el problema del CN del certificado wildcard de Ferozo
 
-define('MAIL_SMTP_HOST', 'mail.galatv.com.ar');
+define('MAIL_SMTP_HOST', '200.58.111.88');
 define('MAIL_SMTP_PORT', 587);
 define('MAIL_SMTP_SECURE', 'tls');
 define('MAIL_SMTP_USER', 'contacto@galatv.com.ar');

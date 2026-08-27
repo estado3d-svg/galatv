@@ -37,15 +37,16 @@ try {
     $mail->Port       = MAIL_SMTP_PORT;
     $mail->CharSet    = 'UTF-8';
 
-    // Ferozo usa certificado wildcard *.ferozo.com que no coincide con el host,
-    // por lo que hay que desactivar la verificación del certificado (COMÚN en hostings)
+    // Desactivar verificación de certificado (el CN del wildcard de Ferozo no coincide con la IP/host)
     $mail->SMTPOptions = array(
         'ssl' => array(
             'verify_peer'       => false,
             'verify_peer_name'  => false,
-            'allow_self_signed' => true
+            'allow_self_signed' => true,
+            'peer_name'         => 'mail.galatv.com.ar'
         )
     );
+    $mail->Host = MAIL_SMTP_HOST;
 
     // Remitente y destinatario
     $mail->setFrom(MAIL_FROM, 'GalaTV');
