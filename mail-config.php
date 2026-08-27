@@ -8,4 +8,4 @@ define('MAIL_SMTP_SECURE', 'tls');
 define('MAIL_SMTP_USER', 'contacto@galatv.com.ar');
 define('MAIL_SMTP_PASS', 'Vph4N*Di');
 define('MAIL_FROM', 'contacto@galatv.com.ar');
-define('MAIL_TO', 'bodorola@gmail.com');
+define('MAIL_TO', 'galatvstreaming@gmail.com');
