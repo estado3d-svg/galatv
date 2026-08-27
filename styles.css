@@ -32,9 +32,12 @@ button{cursor:pointer}
 .contact-form{background:#080808;padding:30px;border-radius:8px;border:1px solid #2c2410}
 .form-group{margin-bottom:20px}
 .form-group label{display:block;margin-bottom:8px;color:#FFD700;font-size:14px;font-weight:500}
-.form-group input,.form-group textarea{width:100%;padding:12px 15px;background:#0a0a0a;border:1px solid #2c2410;border-radius:4px;color:#fff;font-size:14px;transition:border-color 0.3s}
-.form-group input:focus,.form-group textarea:focus{border-color:#FFD700;outline:none}
+.form-group input,.form-group textarea{width:100%;padding:12px 15px;background:#0a0a0a;border:1px solid #2c2410;border-radius:4px;color:#fff;font-size:14px;transition:border-color 0.3s,background 0.3s}
+.form-group input:focus,.form-group textarea:focus{border-color:#FFD700;outline:none;background:#111}
 .form-group input::placeholder,.form-group textarea::placeholder{color:#666}
+.form-group input,.form-group textarea{min-height:44px}
+.form-group input[type="text"],.form-group input[type="email"],.form-group input[type="tel"]{height:auto}
+.form-group textarea{resize:vertical,min-height:100px}
 .btn-submit{width:100%;padding:14px 20px;background:linear-gradient(180deg,#ffd46d,#e9ad32);border:1px solid #b88720;color:#1b1202;font-size:14px;font-weight:bold;border-radius:4px;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s}
 .btn-submit:hover{transform:translateY(-2px);box-shadow:0 4px 15px rgba(255,215,0,0.4)}
 .btn-submit:active{transform:translateY(0)}
