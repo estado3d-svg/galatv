@@ -102,7 +102,7 @@ button{cursor:pointer}
 .feature>span{color:#f0c02f;font-size:38px;width:43px;text-align:center}
 .feature i{color:#FFD700;font-size:32px;text-shadow:0 0 15px rgba(255,215,0,0.6);display:inline-block}
 .feature b{display:block;width:18px;height:2px;background:var(--gold);margin-top:8px}
-.benefits{max-width:1260px;margin:20px auto 0;border:1px solid #3b2c0c;border-radius:7px;display:grid;grid-template-columns:repeat(4,1fr);background:rgba(8,8,8,.88)}
+.benefits{max-width:1260px;margin:20px auto 0;border:1px solid #3b2c0c;border-radius:7px;display:grid;grid-template-columns:repeat(4,1fr);background:rgba(8,8,8,.88);position:relative;z-index:2}
 .benefits>div{height:70px;display:flex;align-items:center;justify-content:center;gap:13px;border-right:1px solid #282114}
 .benefits>div:last-child{border-right:0}
 .benefits span{font-size:34px;color:#efc12e}
@@ -146,9 +146,9 @@ a.program-card .ad-title{color:#FFD700!important}
 .program-card small{font-size:9px;color:#aaa;margin-left:10px}
 .program-card time{float:right;font-size:9px;color:#c5aa48;margin:0 10px 0 0}
 .subscription-panel{max-width:740px;height:170px;position:relative;margin:-186px 36px 15px auto;border:1px solid #7c5b13;border-radius:8px;overflow:hidden;background:#000;z-index:2}
-.schedule{max-width:1510px;margin:15px auto 0;padding:0 36px 20px;z-index:2}
-.commercial-section{max-width:1400px;margin:40px auto 0;padding:60px 36px;background:linear-gradient(180deg,rgba(255,215,0,0.03) 0%,transparent 100%);border-radius:10px;border:1px solid #2c2410;z-index:2}
-.footer{background:#0a0a0a;border-top:1px solid #2c2410;padding:40px 36px;margin-top:60px;z-index:2}
+.schedule{max-width:1510px;margin:15px auto 0;padding:0 36px 20px;position:relative;z-index:2}
+.commercial-section{max-width:1400px;margin:40px auto 0;padding:60px 36px;background:linear-gradient(180deg,rgba(255,215,0,0.03) 0%,transparent 100%);border-radius:10px;border:1px solid #2c2410;position:relative;z-index:2}
+.footer{background:#0a0a0a;border-top:1px solid #2c2410;padding:40px 36px;margin-top:60px;position:relative;z-index:2}
 .subscription-panel>img{width:100%;height:100%;object-fit:cover;display:block;opacity:.9}
 .subscription-overlay{position:absolute;inset:0;padding:20px}
 .subscription-overlay .mini-title{color:#d0aa35;font-size:10px}
