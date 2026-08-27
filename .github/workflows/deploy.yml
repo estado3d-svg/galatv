@@ -12,25 +12,33 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y lftp
-
       - name: Deploy to FTP
         run: |
+          echo "Connecting to FTP server: ${{ secrets.FTP_SERVER }}"
+          echo "Username: ${{ secrets.FTP_USERNAME }}"
+          echo "Directory: ${{ secrets.FTP_DIR }}"
+          
+          # Instalar lftp
+          sudo apt-get update
+          sudo apt-get install -y lftp
+          
+          # Conectar y subir archivos
           lftp -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
-            -e "set sftp:server=${{ secrets.FTP_SERVER }}; \
-                 set sftp:passive-mode=true; \
-                 set ftps-wrapper-command=openssl s_client -connect ${{ secrets.FTP_SERVER }}:21 -quiet; \
+            -e "set ssl:verify-certificate false; \
+                 set ftps-wrapper-command openssl s_client -connect ${{ secrets.FTP_SERVER }}:21 -quiet; \
                  open ${{ secrets.FTP_SERVER }}; \
                  cd ${{ secrets.FTP_DIR }}; \
-                 put -c -r ./*; \
+                 mirror /tmp/deploy / -R; \
                  bye" <<EOF
-          set ssl:verify-certificate off
+          set ssl:verify-certificate false
           set ftps-wrapper-command openssl s_client -connect ${{ secrets.FTP_SERVER }}:21 -quiet
           open ${{ secrets.FTP_SERVER }}
           cd ${{ secrets.FTP_DIR }}
-          put -c -r ./*
+          mirror /tmp/deploy / -R
           bye
           EOF
+
+      - name: Upload files
+        run: |
+          mkdir -p /tmp/deploy
+          cp -r . /tmp/deploy/ --exclude='.git' --exclude='.github' --exclude='node_modules'
