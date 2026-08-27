@@ -20,4 +20,4 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-root: ./
           remote-root: /
-          protocol: ftps
+          protocol: explicit-tls
