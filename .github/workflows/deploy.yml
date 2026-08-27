@@ -10,21 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
-
-      - name: Install lftp
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq lftp
+        uses: actions/checkout@v4
 
       - name: Deploy to FTP
-        run: |
-          echo "Starting FTP deployment..."
-          
-          # Crear carpeta temporal
-          mkdir -p /tmp/galatv-deploy
-          cp -r . /tmp/galatv-deploy/ --exclude='.git' --exclude='.github' --exclude='node_modules' --exclude='.env*'
-          
-          # Conectar a FTPS
-          lftp -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
-            -e "set ssl:verify-certificate false; open ${{ secrets.FTP_SERVER }}; cd ${{ secrets.FTP_DIR }}; mirror /tmp/galatv-deploy / -R; bye"
+        uses: SamKirkland/FTP-Deploy-Action@v4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-root: ./
+          remote-root: ${{ secrets.FTP_DIR }}
+          protocol: explicit-tls
