@@ -381,10 +381,26 @@
         const sData = await sRes.json();
         const liveVideoId = sData?.items?.[0]?.id?.videoId;
         if (!liveVideoId) {
-          // No hay transmisión: mostrar imagen, ocultar video
+          // No hay transmisión: mostrar miniatura del último video como poster
           el.textContent = '0';
-          if (heroImage) heroImage.style.display = 'block';
           if (heroVideo) heroVideo.style.display = 'none';
+          if (heroImage) heroImage.style.display = 'block';
+
+          // Buscar el último video publicado del canal para usar su miniatura
+          try {
+            const lastRes = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&order=date&type=video&maxResults=1&key=${YOUTUBE_API_KEY}`);
+            const lastData = await lastRes.json();
+            const thumb = lastData?.items?.[0]?.snippet?.thumbnails?.high?.url || lastData?.items?.[0]?.snippet?.thumbnails?.medium?.url;
+            const lastVideoId = lastData?.items?.[0]?.id?.videoId;
+            if (thumb) {
+              heroImage.src = thumb;
+              // Hacer que al hacer click abra el último video
+              heroImage.style.cursor = 'pointer';
+              heroImage.onclick = () => {
+                if (lastVideoId) window.open(`https://www.youtube.com/watch?v=${lastVideoId}`, '_blank');
+              };
+            }
+          } catch (e) {}
           return;
         }
 
@@ -393,8 +409,8 @@
         const vData = await vRes.json();
         const viewers = parseInt(vData?.items?.[0]?.liveStreamingDetails?.concurrentViewers || 0);
 
-        // Hay transmisión: mostrar video, ocultar imagen
-        if (heroImage) heroImage.style.display = 'none';
+        // Hay transmisión: mostrar video, restaurar imagen original al volver
+        if (heroImage) { heroImage.src = 'base.jpeg'; heroImage.style.cursor = 'default'; heroImage.onclick = null; heroImage.style.display = 'none'; }
         if (heroVideo) heroVideo.style.display = 'block';
 
         if (viewers > 0) {
