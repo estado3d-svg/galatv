@@ -118,6 +118,10 @@ button{cursor:pointer}
 .schedule-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 .program-card{min-width:0;background:#070707;border:1px solid #2b2412;border-radius:6px;padding-bottom:7px;overflow:hidden;position:relative}
 a.program-card{text-decoration:none;color:inherit;display:block}
+a.program-card h4,a.program-card small,a.program-card div{color:inherit}
+a.program-card h4{color:#fff}
+a.program-card small{color:#aaa}
+a.program-card .ad-title{color:#FFD700!important}
 .program-card.ad-card{cursor:pointer;transition:transform .2s,box-shadow .2s}
 .program-card.ad-card:hover{transform:translateY(-2px);box-shadow:0 4px 18px rgba(255,215,0,.25)}
 
