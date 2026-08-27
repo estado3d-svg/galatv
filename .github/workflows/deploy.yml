@@ -7,17 +7,27 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install lftp
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+
       - name: Deploy to FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-root: ./
-          remote-root: ${{ secrets.FTP_DIR }}
-          protocol: explicit-tls
+        run: |
+          echo "Deploying to ${{ secrets.FTP_SERVER }}..."
+          
+          mkdir -p /tmp/deploy
+          cp -r . /tmp/deploy/ --exclude='.git' --exclude='.github' --exclude='node_modules'
+          
+          lftp -u "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
+            -e "set ssl:verify-certificate false; \
+                 set ftps-wrapper-command openssl s_client -connect ${{ secrets.FTP_SERVER }}:21 -quiet; \
+                 open ${{ secrets.FTP_SERVER }}; \
+                 cd ${{ secrets.FTP_DIR }}; \
+                 mirror /tmp/deploy / -R; \
+                 bye"
