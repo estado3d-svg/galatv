@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#050505">
   <title>Gala TV Streaming</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="styles.css?v=23">
+  <link rel="stylesheet" href="styles.css?v=24">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -20,13 +20,13 @@
         <img src="logo.png" alt="Gala TV">
         <svg class="brand-tagline" id="brandTagline" viewBox="0 0 220 24" xmlns="http://www.w3.org/2000/svg" aria-label="Streaming">
           <text x="110" y="17" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="normal" fill="#c9c9c9" letter-spacing="4">STREAMING</text>
-          <rect class="line-l" x="8" y="14" width="26" height="2" fill="#d81c1c"/>
-          <rect class="line-r" x="186" y="14" width="26" height="2" fill="#d81c1c"/>
+          <rect class="line-l" x="40" y="14" width="26" height="2" fill="#d81c1c"/>
+          <rect class="line-r" x="154" y="14" width="26" height="2" fill="#d81c1c"/>
           <style>
-            #brandTagline .line-l{animation:sway-l 2.4s ease-in-out infinite}
-            #brandTagline .line-r{animation:sway-r 2.4s ease-in-out infinite}
-            @keyframes sway-l{0%,100%{transform:translateX(0);opacity:1}50%{transform:translateX(-8px);opacity:0.5}}
-            @keyframes sway-r{0%,100%{transform:translateX(0);opacity:1}50%{transform:translateX(8px);opacity:0.5}}
+            #brandTagline .line-l{transform-origin:right center;animation:nacer-l 2s ease-in-out infinite}
+            #brandTagline .line-r{transform-origin:left center;animation:nacer-r 2s ease-in-out infinite}
+            @keyframes nacer-l{0%{transform:scaleX(0);opacity:0}40%{transform:scaleX(1);opacity:1}100%{transform:scaleX(0);opacity:0}}
+            @keyframes nacer-r{0%{transform:scaleX(0);opacity:0}40%{transform:scaleX(1);opacity:1}100%{transform:scaleX(0);opacity:0}}
           </style>
         </svg>
       </div>
