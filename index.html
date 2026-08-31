@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#050505">
   <title>Gala TV Streaming</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="styles.css?v=18">
+  <link rel="stylesheet" href="styles.css?v=19">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -16,44 +16,7 @@
   <div class="golden-trails"></div>
   <header class="topbar">
     <a class="brand" href="#inicio" aria-label="Gala TV">
-      <svg class="brand-svg" viewBox="0 0 240 86" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Gala TV Streaming">
-        <defs>
-          <linearGradient id="gradPlateado" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#ffffff"/>
-            <stop offset="0.5" stop-color="#c9c9c9"/>
-            <stop offset="1" stop-color="#9a9a9a"/>
-          </linearGradient>
-        </defs>
-        <!-- icono transmisión (ondas) -->
-        <g fill="none" stroke="#d81c1c" stroke-width="4" stroke-linecap="round">
-          <circle cx="120" cy="14" r="4" fill="#d81c1c" stroke="none"/>
-          <path d="M112 6 Q120 14 112 22"/>
-          <path d="M128 6 Q120 14 128 22"/>
-          <path d="M105 1 Q120 14 105 27" opacity="0.7"/>
-          <path d="M135 1 Q120 14 135 27" opacity="0.7"/>
-          <path d="M98 -4 Q120 14 98 32" opacity="0.4"/>
-          <path d="M142 -4 Q120 14 142 32" opacity="0.4"/>
-        </g>
-        <!-- GALA STREAMING -->
-        <g font-family="Arial, Helvetica, sans-serif">
-          <text x="120" y="52" text-anchor="middle" font-size="38" font-weight="bold" fill="url(#gradPlateado)" letter-spacing="1">GALA</text>
-          <text x="120" y="70" text-anchor="middle" font-size="13" font-weight="normal" fill="#b7b7b7" letter-spacing="6">STREAMING</text>
-        </g>
-        <!-- líneas rojas animadas a los lados de STREAMING -->
-        <g>
-          <rect x="18" y="64" width="0" height="2.5" fill="#d81c1c" class="line-roja-izq" transform="translate(0 0)"/>
-          <rect x="222" y="64" width="0" height="2.5" fill="#d81c1c" class="line-roja-der" transform="translate(0 0)"/>
-        </g>
-        <style>
-          .line-roja-izq,.line-roja-der{animation:latido 2.4s ease-in-out infinite}
-          .line-roja-izq{transform-origin:right center}
-          .line-roja-der{transform-origin:left center}
-          @keyframes latido{
-            0%,100%{width:34px;opacity:1}
-            50%{width:12px;opacity:0.35}
-          }
-        </style>
-      </svg>
+      <img src="logo.png" alt="Gala TV Streaming">
     </a>
 
     <nav class="nav">
