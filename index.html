@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#050505">
   <title>Gala TV Streaming</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="styles.css?v=22">
+  <link rel="stylesheet" href="styles.css?v=23">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -23,10 +23,10 @@
           <rect class="line-l" x="8" y="14" width="26" height="2" fill="#d81c1c"/>
           <rect class="line-r" x="186" y="14" width="26" height="2" fill="#d81c1c"/>
           <style>
-            #brandTagline .line-l{transform-origin:right center;animation:opuesto-l 2.4s ease-in-out infinite}
-            #brandTagline .line-r{transform-origin:left center;animation:opuesto-r 2.4s ease-in-out infinite}
-            @keyframes opuesto-l{0%,100%{width:26px;opacity:1}50%{width:8px;opacity:0.3}}
-            @keyframes opuesto-r{0%,100%{width:8px;opacity:0.3}50%{width:26px;opacity:1}}
+            #brandTagline .line-l{animation:sway-l 2.4s ease-in-out infinite}
+            #brandTagline .line-r{animation:sway-r 2.4s ease-in-out infinite}
+            @keyframes sway-l{0%,100%{transform:translateX(0);opacity:1}50%{transform:translateX(-8px);opacity:0.5}}
+            @keyframes sway-r{0%,100%{transform:translateX(0);opacity:1}50%{transform:translateX(8px);opacity:0.5}}
           </style>
         </svg>
       </div>
