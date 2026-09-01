@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#050505">
   <title>Gala TV Streaming</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="styles.css?v=31">
+  <link rel="stylesheet" href="styles.css?v=32">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -70,9 +70,8 @@
       </div>
 
       <div class="player-wrap">
-        <div class="live-tag off" id="liveTag">OFFLINE</div>
-        <img class="hero-image" src="base.png" alt="Transmisión en vivo" id="heroImage">
-        <iframe class="hero-video" id="heroVideo" src="https://www.youtube.com/embed/live_stream?channel=UCNbKWLI2_ivAZIAQQ5ot6Ng&autoplay=1&mute=0" title="Transmisión en vivo GalaTV" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="display:none"></iframe>
+        <div class="live-tag" id="liveTag">EN VIVO</div>
+        <iframe class="hero-video" id="heroVideo" src="https://www.youtube.com/embed/live_stream?channel=UCNbKWLI2_ivAZIAQQ5ot6Ng&autoplay=1&mute=0" title="Transmisión en vivo GalaTV" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
       </div>
 
       <aside class="features">
@@ -344,8 +343,6 @@
     const YOUTUBE_CHANNEL_HANDLE = '@GalaTvStreaming';
 
     async function fetchLiveViewers() {
-      const heroImage = document.getElementById('heroImage');
-      const heroVideo = document.getElementById('heroVideo');
       const liveTag = document.querySelector('.live-tag');
       try {
         // 1. Obtener el ID del canal a partir del handle
@@ -358,35 +355,16 @@
         const sRes = await fetch(`https://www.googleapis.com/youtube/v3/search?part=id&channelId=${channelId}&eventType=live&type=video&key=${YOUTUBE_API_KEY}`);
         const sData = await sRes.json();
         const liveVideoId = sData?.items?.[0]?.id?.videoId;
-        if (!liveVideoId) {
-          // No hay transmisión: mostrar miniatura del último video como poster
-          if (heroVideo) heroVideo.style.display = 'none';
-          if (heroImage) heroImage.style.display = 'block';
+
+        // El video de YouTube siempre está visible. Solo cambiamos la etiqueta.
+        if (liveVideoId) {
+          if (liveTag) { liveTag.classList.remove('off'); liveTag.textContent = 'EN VIVO'; }
+        } else {
           if (liveTag) { liveTag.classList.add('off'); liveTag.textContent = 'OFFLINE'; }
-
-          // Buscar el último video publicado del canal para usar su miniatura
-          try {
-            const lastRes = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&order=date&type=video&maxResults=1&key=${YOUTUBE_API_KEY}`);
-            const lastData = await lastRes.json();
-            const thumb = lastData?.items?.[0]?.snippet?.thumbnails?.high?.url || lastData?.items?.[0]?.snippet?.thumbnails?.medium?.url;
-            const lastVideoId = lastData?.items?.[0]?.id?.videoId;
-            if (thumb) {
-              heroImage.src = thumb;
-              heroImage.style.cursor = 'pointer';
-              heroImage.onclick = () => {
-                if (lastVideoId) window.open(`https://www.youtube.com/watch?v=${lastVideoId}`, '_blank');
-              };
-            }
-          } catch (e) {}
-          return;
         }
-
-        // Hay transmisión: mostrar video, restaurar imagen original al volver
-        if (heroImage) { heroImage.src = 'base.png'; heroImage.style.cursor = 'default'; heroImage.onclick = null; heroImage.style.display = 'none'; }
-        if (heroVideo) heroVideo.style.display = 'block';
-        if (liveTag) { liveTag.classList.remove('off'); liveTag.textContent = 'EN VIVO'; }
       } catch (err) {
-        if (liveTag) { liveTag.classList.add('off'); liveTag.textContent = 'OFFLINE'; }
+        // Si la API falla, dejamos la etiqueta en EN VIVO (el video igual se muestra)
+        if (liveTag) { liveTag.classList.remove('off'); liveTag.textContent = 'EN VIVO'; }
       }
     }
 
