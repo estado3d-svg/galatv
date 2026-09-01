@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#050505">
   <title>Gala TV Streaming</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="styles.css?v=26">
+  <link rel="stylesheet" href="styles.css?v=27">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -67,12 +67,6 @@
           <button class="secondary" onclick="showInfo()" data-i18n="MÁS INFORMACIÓN">MÁS INFORMACIÓN</button>
         </div>
 
-        <div class="viewers">
-          <span class="avatars">
-            <i></i><i></i><i></i><i></i>
-          </span>
-          <strong id="liveViewers">... </strong> <span data-i18n="viendo en vivo">viendo en vivo</span>
-        </div>
       </div>
 
       <div class="player-wrap">
@@ -357,7 +351,6 @@
     const YOUTUBE_CHANNEL_HANDLE = '@GalaTvStreaming';
 
     async function fetchLiveViewers() {
-      const el = document.getElementById('liveViewers');
       const heroImage = document.getElementById('heroImage');
       const heroVideo = document.getElementById('heroVideo');
       const liveTag = document.querySelector('.live-tag');
@@ -374,7 +367,6 @@
         const liveVideoId = sData?.items?.[0]?.id?.videoId;
         if (!liveVideoId) {
           // No hay transmisión: mostrar miniatura del último video como poster
-          el.textContent = '0';
           if (heroVideo) heroVideo.style.display = 'none';
           if (heroImage) heroImage.style.display = 'block';
           if (liveTag) { liveTag.classList.add('off'); liveTag.textContent = 'OFFLINE'; }
@@ -387,7 +379,6 @@
             const lastVideoId = lastData?.items?.[0]?.id?.videoId;
             if (thumb) {
               heroImage.src = thumb;
-              // Hacer que al hacer click abra el último video
               heroImage.style.cursor = 'pointer';
               heroImage.onclick = () => {
                 if (lastVideoId) window.open(`https://www.youtube.com/watch?v=${lastVideoId}`, '_blank');
@@ -397,23 +388,11 @@
           return;
         }
 
-        // 3. Obtener el número de espectadores concurrentes
-        const vRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=liveStreamingDetails&id=${liveVideoId}&key=${YOUTUBE_API_KEY}`);
-        const vData = await vRes.json();
-        const viewers = parseInt(vData?.items?.[0]?.liveStreamingDetails?.concurrentViewers || 0);
-
         // Hay transmisión: mostrar video, restaurar imagen original al volver
         if (heroImage) { heroImage.src = 'base.png'; heroImage.style.cursor = 'default'; heroImage.onclick = null; heroImage.style.display = 'none'; }
         if (heroVideo) heroVideo.style.display = 'block';
         if (liveTag) { liveTag.classList.remove('off'); liveTag.textContent = 'EN VIVO'; }
-
-        if (viewers > 0) {
-          el.textContent = '+' + (viewers >= 1000 ? (viewers/1000).toFixed(1) + 'K' : viewers);
-        } else {
-          el.textContent = '...';
-        }
       } catch (err) {
-        el.textContent = '0';
         if (liveTag) { liveTag.classList.add('off'); liveTag.textContent = 'OFFLINE'; }
       }
     }
