@@ -154,7 +154,8 @@ button{cursor:pointer}
   .features{display:none}.benefits{grid-template-columns:1fr 1fr;margin:15px;border-radius:6px}
   .benefits>div{height:65px}.benefits>div:nth-child(2){border-right:0}.benefits span{font-size:25px}
   .schedule{padding:0 15px}.schedule-grid{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px}
-  .banners-row{width:100%;padding:0;margin-top:12px}
+  .banners-row{width:100%;padding:0;margin-top:12px;grid-template-columns:1fr}
+  .banner-img{height:auto;max-height:200px}
   .banner-img{height:auto;max-height:120px}
   .golden-grid,.golden-overlay{display:none!important}
 
