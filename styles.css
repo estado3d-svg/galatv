@@ -115,7 +115,7 @@ button{cursor:pointer}
 .schedule-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 .program-card{min-width:0;background:#070707;border:1px solid #2b2412;border-radius:6px;padding-bottom:7px;overflow:hidden;position:relative}
 .ad-banner-img{width:333px;max-width:100%;height:150px;object-fit:cover;border-radius:6px;cursor:pointer;display:block;border:1px solid #2b2412}
-.banners-row{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px}
+.banners-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px;padding:0 36px}
 .banner-link{display:block;text-decoration:none}
 .banner-img{width:100%;height:150px;object-fit:cover;border-radius:6px;display:block;border:1px solid #2b2412;transition:transform .2s,box-shadow .2s}
 .banner-link:hover .banner-img{transform:translateY(-2px);box-shadow:0 4px 18px rgba(255,215,0,.3)}
@@ -153,8 +153,8 @@ button{cursor:pointer}
   .player-wrap{width:100%;height:290px}.live-tag{top:12px;left:12px}
   .features{display:none}.benefits{grid-template-columns:1fr 1fr;margin:15px;border-radius:6px}
   .benefits>div{height:65px}.benefits>div:nth-child(2){border-right:0}.benefits span{font-size:25px}
-  .schedule{padding:0 15px}.schedule-grid{display:flex;flex-wrap:wrap;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px}
-  .banners-row{flex-basis:100%;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+  .schedule{padding:0 15px}.schedule-grid{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px}
+  .banners-row{width:100%;padding:0;margin-top:12px}
   .banner-img{height:auto;max-height:120px}
   .golden-grid,.golden-overlay{display:none!important}
 
