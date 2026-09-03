@@ -141,10 +141,18 @@ $email = $_SESSION['email'] ?? '';
       <div class="card">
         <h2 style="font-size:17px;margin-bottom:15px">Agregar programa</h2>
         <form id="addPrograma" class="row" style="flex-direction:column;align-items:flex-start">
-          <div style="display:flex;gap:10px;width:100%;flex-wrap:wrap">
-            <input type="text" id="npTitulo" placeholder="Título (ej: EL HEREDERO)" style="flex:1;min-width:180px">
-            <input type="text" id="npCategoria" placeholder="Categoría (ej: DRAMA)" style="flex:1;min-width:140px">
-            <input type="text" id="npHora" placeholder="Hora (ej: 20:00)" style="width:110px">
+          <div style="display:flex;gap:10px;width:100%;flex-wrap:wrap;align-items:flex-end">
+            <input type="text" id="npTitulo" placeholder="Título (ej: EL HEREDERO)" style="flex:1;min-width:150px">
+            <input type="text" id="npCategoria" placeholder="Categoría (ej: DRAMA)" style="flex:1;min-width:130px">
+            <div style="display:flex;gap:5px;align-items:center">
+              <input type="number" id="npHh" min="1" max="12" placeholder="HH" style="width:60px" title="Hora">
+              <span style="color:#888">:</span>
+              <input type="number" id="npMm" min="0" max="59" placeholder="MM" value="00" style="width:60px" title="Minutos">
+              <select id="npAmpm" style="background:#111;border:1px solid #2c2410;color:#ddd;padding:9px 8px;border-radius:4px;font-size:13px">
+                <option value="AM">AM</option>
+                <option value="PM">PM</option>
+              </select>
+            </div>
           </div>
           <div class="dias" id="npDias">
             <span class="dia" data-d="D">D</span>
@@ -422,13 +430,22 @@ loadBanners();
         const el = document.createElement('div');
         el.className = 'programa';
         const img = p.imagen ? `<img src="../${p.imagen}" alt="">` : '<img src="" alt="" style="opacity:.2">';
+        const hp = parseHora(p.hora); // {hh, mm, ampm}
         el.innerHTML = `
           ${img}
           <div class="info">
             <input data-pid="${p.id}" data-f="titulo" value="${(p.titulo||'').replace(/"/g,'&quot;')}">
             <div class="pf">
               <input data-pid="${p.id}" data-f="categoria" value="${(p.categoria||'').replace(/"/g,'&quot;')}" placeholder="Categoría">
-              <input data-pid="${p.id}" data-f="hora" value="${(p.hora||'').replace(/"/g,'&quot;')}" placeholder="Hora (20:00)">
+              <div style="display:flex;gap:5px;align-items:center">
+                <input type="number" data-pid="${p.id}" data-f="hh" min="1" max="12" value="${hp.hh}" style="width:55px" placeholder="HH">
+                <span style="color:#888">:</span>
+                <input type="number" data-pid="${p.id}" data-f="mm" min="0" max="59" value="${hp.mm}" style="width:55px" placeholder="MM">
+                <select data-pid="${p.id}" data-f="ampm" style="background:#111;border:1px solid #2c2410;color:#ddd;padding:7px 8px;border-radius:4px;font-size:12px">
+                  <option value="AM" ${hp.ampm==='AM'?'selected':''}>AM</option>
+                  <option value="PM" ${hp.ampm==='PM'?'selected':''}>PM</option>
+                </select>
+              </div>
             </div>
             <div class="dias" id="dias-${p.id}">
               ${DIAS.map(dd => `<span class="dia" data-d="${dd}">${dd === 'M2' ? 'M' : dd}</span>`).join('')}
@@ -445,15 +462,33 @@ loadBanners();
       });
     }
 
+    function parseHora(hora) {
+      let hh = '12', mm = '00', ampm = 'PM';
+      const m = String(hora || '').trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+      if (m) {
+        hh = String(parseInt(m[1], 10)).padStart(2, '0');
+        mm = m[2] || '00';
+        ampm = (m[3] || 'PM').toUpperCase();
+      }
+      return { hh, mm, ampm };
+    }
+
+    function buildHora(hh, mm, ampm) {
+      const h = String(parseInt(hh || '12', 10) || 12).padStart(2, '0');
+      const mi = String(parseInt(mm || '0', 10) || 0).padStart(2, '0');
+      return h + ':' + mi + ' ' + (ampm || 'PM').toUpperCase();
+    }
+
     async function savePrograma(id) {
       const g = f => document.querySelector(`input[data-pid="${id}"][data-f="${f}"]`).value.trim();
+      const sel = f => document.querySelector(`select[data-pid="${id}"][data-f="${f}"]`).value;
       const fd = new FormData();
       fd.append('action', 'programas_save');
       fd.append('id', id);
       fd.append('titulo', g('titulo'));
       fd.append('categoria', g('categoria'));
       fd.append('dias', diasStringFromSel('dias-' + id));
-      fd.append('hora', g('hora'));
+      fd.append('hora', buildHora(g('hh'), g('mm'), sel('ampm')));
       const res = await fetch(API, { method: 'POST', body: fd });
       const data = await res.json();
       showMsg(data.success ? 'Programa guardado ✓' : (data.error || 'Error'));
@@ -497,12 +532,13 @@ loadBanners();
       fd.append('titulo', document.getElementById('npTitulo').value.trim());
       fd.append('categoria', document.getElementById('npCategoria').value.trim());
       fd.append('dias', diasStringFromSel('npDias'));
-      fd.append('hora', document.getElementById('npHora').value.trim());
+      fd.append('hora', buildHora(document.getElementById('npHh').value, document.getElementById('npMm').value, document.getElementById('npAmpm').value));
       const res = await fetch(API, { method: 'POST', body: fd });
       const data = await res.json();
       showMsg(data.success ? 'Programa agregado ✓' : (data.error || 'Error'));
       if (data.success) {
         document.getElementById('addPrograma').reset();
+        document.getElementById('npMm').value = '00';
         document.querySelectorAll('#npDias .dia').forEach(d => d.classList.remove('on'));
         loadProgramas();
       }
