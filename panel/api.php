@@ -153,12 +153,39 @@ switch ($action) {
         if (empty($_FILES['file']['name'])) { echo json_encode(['success' => false, 'error' => 'No se recibió archivo']); exit; }
         $ext = strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION));
         if (!in_array($ext, ['gif','png','jpg','jpeg','webp'])) { echo json_encode(['success' => false, 'error' => 'Formato no permitido. Usá GIF, PNG, JPG o WEBP.']); exit; }
+
         $imgDir = __DIR__ . '/img_prog';
         $imgUrl = 'panel/img_prog';
         if (!is_dir($imgDir)) @mkdir($imgDir, 0775, true);
-        $filename = 'prog-' . $id . '-' . time() . '.' . $ext;
+
+        // Redimensionar a 333x500 px
+        $targetW = 333;
+        $targetH = 500;
+
+        $src = $_FILES['file']['tmp_name'];
+        $srcImg = null;
+        switch ($ext) {
+            case 'jpg': case 'jpeg': $srcImg = @imagecreatefromjpeg($src); break;
+            case 'png':  $srcImg = @imagecreatefrompng($src); break;
+            case 'webp': $srcImg = @imagecreatefromwebp($src); break;
+            case 'gif':  $srcImg = @imagecreatefromgif($src); break;
+        }
+        if (!$srcImg) { echo json_encode(['success' => false, 'error' => 'No se pudo leer la imagen']); exit; }
+
+        $w = imagesx($srcImg);
+        $h = imagesy($srcImg);
+        $dst = imagecreatetruecolor($targetW, $targetH);
+
+        // fondo gris/negro para transparentes
+        imagefill($dst, 0, 0, imagecolorallocate($dst, 5, 5, 5));
+        imagecopyresampled($dst, $srcImg, 0, 0, 0, 0, $targetW, $targetH, $w, $h);
+        imagedestroy($srcImg);
+
+        $filename = 'prog-' . $id . '-' . time() . '.jpg';
         $dest = $imgDir . '/' . $filename;
-        if (!move_uploaded_file($_FILES['file']['tmp_name'], $dest)) { echo json_encode(['success' => false, 'error' => 'No se pudo guardar el archivo']); exit; }
+        if (!imagejpeg($dst, $dest, 85)) { echo json_encode(['success' => false, 'error' => 'No se pudo guardar la imagen']); exit; }
+        imagedestroy($dst);
+
         // borrar imagen anterior si era propia
         $prev = $pdo->prepare('SELECT imagen FROM programas WHERE id = ?');
         $prev->execute([$id]);
