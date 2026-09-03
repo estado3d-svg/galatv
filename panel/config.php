@@ -18,6 +18,11 @@ define('ALLOWED_USERS', array(
     'bodorola@gmail.com'
 ));
 
+// URI de redirección de Google (default; puede overriderse en config.local.php)
+if (!defined('GOOGLE_REDIRECT_URI')) {
+    define('GOOGLE_REDIRECT_URI', 'https://galatv.com.ar/panel/google-callback.php');
+}
+
 // Session segura
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_set_cookie_params([
