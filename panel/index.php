@@ -64,6 +64,10 @@ $email = $_SESSION['email'] ?? '';
   .dias{display:flex;gap:6px;margin:8px 0}
   .dia{width:34px;height:34px;border-radius:50%;border:2px solid #444;color:#666;display:flex;align-items:center;justify-content:center;font-weight:bold;cursor:pointer;font-size:13px;transition:.2s;background:#0a0a0a;user-select:none}
   .dia.on{border-color:#FFD700;color:#FFD700;background:rgba(255,215,0,.15);box-shadow:0 0 8px rgba(255,215,0,.5)}
+  .pane-loading{display:none;text-align:center;padding:40px;color:#c9a94a;font-size:14px}
+  .pane-loading.show{display:block}
+  .spinner{width:38px;height:38px;border:4px solid #333;border-top-color:#FFD700;border-radius:50%;margin:0 auto 14px;animation:spin 0.8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -100,6 +104,7 @@ $email = $_SESSION['email'] ?? '';
 
     <!-- ===== PESTAÑA: PUBLICIDAD (banners) ===== -->
     <div class="pane active" id="pane-publicidad">
+      <div class="pane-loading" id="load-publicidad"><div class="spinner"></div>Cargando...</div>
       <div class="card">
         <h2 style="font-size:17px;margin-bottom:15px">Agregar nuevo banner</h2>
         <div class="drop" id="drop">📥 Arrastrá un GIF/PNG aquí, o clickeá para elegir<br><small style="color:#666">1 cuerpo = 333px · 2 cuerpos = 666px · 3 cuerpos = 999px</small></div>
@@ -124,6 +129,7 @@ $email = $_SESSION['email'] ?? '';
 
     <!-- ===== PESTAÑA: VIDEO DE PORTADA ===== -->
     <div class="pane" id="pane-videoportada">
+      <div class="pane-loading" id="load-videoportada"><div class="spinner"></div>Cargando...</div>
       <div class="card">
         <h2 style="font-size:17px;margin-bottom:15px">Video cuando el canal está OFF</h2>
         <p style="color:#999;font-size:13px;margin-bottom:15px">Este video de YouTube se reproduce en la portada cuando el canal no está en vivo.</p>
@@ -139,6 +145,7 @@ $email = $_SESSION['email'] ?? '';
 
     <!-- ===== PESTAÑA: PROGRAMACIÓN ===== -->
     <div class="pane" id="pane-programacion">
+      <div class="pane-loading" id="load-programacion"><div class="spinner"></div>Cargando...</div>
       <div class="card">
         <h2 style="font-size:17px;margin-bottom:15px">Carrusel de programación</h2>
         <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:center">
@@ -208,12 +215,27 @@ function showMsg(text, type) {
   m._t = setTimeout(() => m.style.display = 'none', 3500);
 }
 
+// Mostrar/ocultar loader de una pestaña
+function showPaneLoading(key) {
+  const el = document.getElementById('load-' + key);
+  if (el) el.classList.add('show');
+}
+function hidePaneLoading(key) {
+  const el = document.getElementById('load-' + key);
+  if (el) el.classList.remove('show');
+}
+
 async function loadBanners() {
-  const res = await fetch(API + '?action=list');
-  const data = await res.json();
-  if (!data.success) return;
-  currentBanners = data.banners;
-  render(data.banners);
+  showPaneLoading('publicidad');
+  try {
+    const res = await fetch(API + '?action=list');
+    const data = await res.json();
+    if (!data.success) return;
+    currentBanners = data.banners;
+    render(data.banners);
+  } finally {
+    hidePaneLoading('publicidad');
+  }
 }
 
 // Reordenar banner (dir: -1 subir, +1 bajar) en el array global
@@ -472,13 +494,15 @@ loadBanners();
     } catch(e){}
 
     async function loadProgramas() {
-      const res = await fetch(API + '?action=programas_list');
-      const data = await res.json();
-      if (!data.success) return;
-      const list = document.getElementById('programasList');
-      list.innerHTML = '';
-      if (!data.programas.length) { list.innerHTML = '<div style="color:#777">No hay programas.</div>'; return; }
-      data.programas.forEach(p => {
+      showPaneLoading('programacion');
+      try {
+        const res = await fetch(API + '?action=programas_list');
+        const data = await res.json();
+        if (!data.success) return;
+        const list = document.getElementById('programasList');
+        list.innerHTML = '';
+        if (!data.programas.length) { list.innerHTML = '<div style="color:#777">No hay programas.</div>'; return; }
+        data.programas.forEach(p => {
         const el = document.createElement('div');
         el.className = 'programa';
         const img = p.imagen ? `<img src="../${p.imagen}" alt="">` : '<img src="" alt="" style="opacity:.2">';
@@ -508,6 +532,9 @@ loadBanners();
         setDias('dias-' + p.id, p.dias);
         bindDias('dias-' + p.id);
       });
+      } finally {
+        hidePaneLoading('programacion');
+      }
     }
 
     function parseHora(hora) {
@@ -621,13 +648,17 @@ loadBanners();
 
 // ===== Video de portada =====
 async function loadSettings() {
-  const res = await fetch(API + '?action=settings_get');
-  const data = await res.json();
-  if (!data.success) return;
-  // Si no hay link guardado, mostrar el video por defecto que usa la página
-  const defOff = 'https://www.youtube.com/watch?v=pDrOzULyCpo';
-  document.getElementById('offLink').value = data.settings.off_link || defOff;
-  document.getElementById('offLoop').checked = parseInt(data.settings.off_loop) === 1;
+  showPaneLoading('videoportada');
+  try {
+    const res = await fetch(API + '?action=settings_get');
+    const data = await res.json();
+    if (!data.success) return;
+    const defOff = 'https://www.youtube.com/watch?v=pDrOzULyCpo';
+    document.getElementById('offLink').value = data.settings.off_link || defOff;
+    document.getElementById('offLoop').checked = parseInt(data.settings.off_loop) === 1;
+  } finally {
+    hidePaneLoading('videoportada');
+  }
 }
 async function saveSettings() {
   const fd = new FormData();
