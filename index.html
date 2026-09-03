@@ -93,24 +93,7 @@
         <h3 data-i18n="PROGRAMACIÓN SEMANAL">PROGRAMACIÓN SEMANAL</h3>
       </div>
 
-      <div class="schedule-grid" id="cards">
-        <article class="program-card">
-          <div class="thumb"><img src="assets/card1.jpg" alt=""><span>▶</span></div>
-          <h4>EL HEREDERO</h4><small>DRAMA</small><time>LUNES 20:00</time>
-        </article>
-        <article class="program-card">
-          <div class="thumb"><img src="assets/card2.jpg" alt=""><span>▶</span></div>
-          <h4>2035: EL FUTURO</h4><small>CIENCIA FICCIÓN</small><time>MARTES 21:00</time>
-        </article>
-        <article class="program-card program-card-proximo">
-          <div class="thumb"><div class="proximo-box">PRÓXIMAMENTE</div></div>
-          <h4>PRÓXIMAMENTE</h4><small>NUEVA SERIE</small>
-        </article>
-        <article class="program-card program-card-proximo">
-          <div class="thumb"><div class="proximo-box">PRÓXIMAMENTE</div></div>
-          <h4>PRÓXIMAMENTE</h4><small>NUEVA SERIE</small>
-        </article>
-      </div>
+      <div class="schedule-grid" id="programasGrid"></div>
 
       <div class="banners-container" id="bannersContainer"></div>
     </section>
@@ -467,9 +450,58 @@
         // Agrupar en filas de hasta 3 "unidades" (banner 333 = 1, banner 666 = 2)
         const rows = groupBannersIntoRows(banners);
         rows.forEach(r => container.appendChild(makeRow(r)));
+
+        // Aplicar video de portada (settings) y programación
+        applySettings(data.settings);
+        loadProgramas(data.programas);
       } catch (e) {
         console.error('Error cargando banners:', e);
       }
+    }
+
+    function applySettings(settings) {
+      if (!settings) return;
+      const v = document.getElementById('heroVideoOffline');
+      if (v && settings.off_link) {
+        const id = extractYtId(settings.off_link);
+        if (id) {
+          const loop = parseInt(settings.off_loop) === 1 ? '&loop=1&playlist=' + id : '';
+          v.src = 'https://www.youtube.com/embed/' + id + '?autoplay=1&mute=1&rel=0' + loop;
+        }
+      }
+      if (settings.off_loop !== undefined) {
+        // guardar estado de loop (lo usa la lógica si se recarga)
+        document.body.dataset.offLoop = settings.off_loop;
+      }
+    }
+
+    function extractYtId(url) {
+      const m = String(url).match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/);
+      return m ? m[1] : null;
+    }
+
+    function loadProgramas(programas) {
+      const grid = document.getElementById('cards');
+      if (!grid || !programas) return;
+      // Los programas se insertan ANTES del contenedor de banners.
+      // Como los banners están en un contenedor aparte (#bannersContainer),
+      // reconstruimos las cards de programa dentro del grid original.
+      // Buscar el contenedor de cards de programas reales.
+      const progGrid = document.getElementById('programasGrid');
+      if (!progGrid) return;
+      progGrid.innerHTML = '';
+      programas.forEach(p => {
+        const card = document.createElement('article');
+        card.className = 'program-card';
+        card.innerHTML = `
+          <div class="thumb"><div class="proximo-box">${escapeHtml(p.titulo)}</div></div>
+          <h4>${escapeHtml(p.titulo)}</h4><small>${escapeHtml(p.categoria)}</small><time>${escapeHtml(p.dia)} ${escapeHtml(p.hora)}</time>`;
+        progGrid.appendChild(card);
+      });
+    }
+
+    function escapeHtml(s) {
+      return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
     function units(b) { return Math.max(1, Math.min(3, parseInt(b.bodies || 1, 10) || 1)); }

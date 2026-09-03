@@ -47,6 +47,19 @@ $email = $_SESSION['email'] ?? '';
   .progress-track{width:320px;max-width:90%;height:10px;background:#1c1c1c;border-radius:5px;overflow:hidden;border:1px solid #333}
   .progress-bar{height:100%;width:0%;background:linear-gradient(90deg,#e9b62e,#FFD700);transition:width .2s}
   .loading-overlay .pct{font-size:13px;color:#c9a94a;margin-top:10px}
+  .tabs{display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid #2c2410;padding-bottom:12px}
+  .tab{background:transparent;border:1px solid #2c2410;color:#aaa;padding:10px 20px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:bold}
+  .tab:hover{color:#fff;border-color:#4a3f14}
+  .tab.active{background:linear-gradient(180deg,#ffd46d,#e9ad32);border-color:#b88720;color:#1b1202}
+  .pane{display:none}
+  .pane.active{display:block}
+  .checkbox-row{display:flex;align-items:center;gap:8px;margin-top:10px}
+  .checkbox-row input{width:18px;height:18px}
+  .programa{display:flex;align-items:center;gap:12px;background:#0a0a0a;border:1px solid #2b2412;border-radius:6px;padding:12px;margin-bottom:10px}
+  .programa .info{flex:1;min-width:0}
+  .programa .info input{width:100%;background:#111;border:1px solid #2c2410;color:#ddd;padding:7px 10px;border-radius:4px;font-size:13px;margin-bottom:6px}
+  .programa .info .pf{display:flex;gap:8px}
+  .programa .info .pf input{flex:1;margin:0}
 </style>
 </head>
 <body>
@@ -68,32 +81,74 @@ $email = $_SESSION['email'] ?? '';
 <?php else: ?>
   <div class="wrap">
     <div class="topbar">
-      <h1>📺 Panel de Banners</h1>
+      <h1>📺 Panel GalaTV</h1>
       <div>
         <span class="user">👤 <?php echo htmlspecialchars($email); ?></span>
         <a href="logout.php" class="btn btn-ghost btn-sm" style="margin-left:10px">Salir</a>
       </div>
     </div>
 
-    <div class="card">
-      <h2 style="font-size:17px;margin-bottom:15px">Agregar nuevo banner</h2>
-      <div class="drop" id="drop">📥 Arrastrá un GIF/PNG aquí, o clickeá para elegir<br><small style="color:#666">1 cuerpo = 333px · 2 cuerpos = 666px · 3 cuerpos = 999px</small></div>
-      <input type="file" id="newFile" accept=".gif,.png,.jpg,.jpeg" style="display:none">
-      <form id="addForm" class="row" style="margin-top:10px">
-        <select id="newBodies" style="background:#111;border:1px solid #2c2410;color:#ddd;padding:9px 12px;border-radius:4px;font-size:13px">
-          <option value="1">1 cuerpo (333px)</option>
-          <option value="2">2 cuerpos (666px)</option>
-          <option value="3">3 cuerpos (999px)</option>
-        </select>
-        <input type="text" id="newLink" placeholder="Link (opcional, ej: https://...)">
-        <input type="text" id="newAlt" placeholder="Texto alternativo" value="Banner">
-        <button type="submit" class="btn">Subir banner</button>
-      </form>
+    <div class="tabs">
+      <button class="tab active" data-tab="publicidad">Publicidad</button>
+      <button class="tab" data-tab="videoportada">Video de portada</button>
+      <button class="tab" data-tab="programacion">Programación</button>
     </div>
 
-    <div class="card">
-      <h2 style="font-size:17px;margin-bottom:15px">Banners existentes</h2>
-      <div id="list"></div>
+    <!-- ===== PESTAÑA: PUBLICIDAD (banners) ===== -->
+    <div class="pane active" id="pane-publicidad">
+      <div class="card">
+        <h2 style="font-size:17px;margin-bottom:15px">Agregar nuevo banner</h2>
+        <div class="drop" id="drop">📥 Arrastrá un GIF/PNG aquí, o clickeá para elegir<br><small style="color:#666">1 cuerpo = 333px · 2 cuerpos = 666px · 3 cuerpos = 999px</small></div>
+        <input type="file" id="newFile" accept=".gif,.png,.jpg,.jpeg" style="display:none">
+        <form id="addForm" class="row" style="margin-top:10px">
+          <select id="newBodies" style="background:#111;border:1px solid #2c2410;color:#ddd;padding:9px 12px;border-radius:4px;font-size:13px">
+            <option value="1">1 cuerpo (333px)</option>
+            <option value="2">2 cuerpos (666px)</option>
+            <option value="3">3 cuerpos (999px)</option>
+          </select>
+          <input type="text" id="newLink" placeholder="Link (opcional, ej: https://...)">
+          <input type="text" id="newAlt" placeholder="Texto alternativo" value="Banner">
+          <button type="submit" class="btn">Subir banner</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2 style="font-size:17px;margin-bottom:15px">Banners existentes</h2>
+        <div id="list"></div>
+      </div>
+    </div>
+
+    <!-- ===== PESTAÑA: VIDEO DE PORTADA ===== -->
+    <div class="pane" id="pane-videoportada">
+      <div class="card">
+        <h2 style="font-size:17px;margin-bottom:15px">Video cuando el canal está OFF</h2>
+        <p style="color:#999;font-size:13px;margin-bottom:15px">Este video de YouTube se reproduce en la portada cuando el canal no está en vivo.</p>
+        <label style="font-size:13px;color:#FFD700;display:block;margin-bottom:6px">Link del video de YouTube (offline)</label>
+        <input type="text" id="offLink" placeholder="https://www.youtube.com/watch?v=..." style="width:100%;background:#111;border:1px solid #2c2410;color:#ddd;padding:10px 12px;border-radius:5px;font-size:14px">
+        <div class="checkbox-row">
+          <input type="checkbox" id="offLoop" checked>
+          <label for="offLoop" style="font-size:13px;color:#ddd">Repetir (loop)</label>
+        </div>
+        <button class="btn" style="margin-top:15px" onclick="saveSettings()">Guardar video de portada</button>
+      </div>
+    </div>
+
+    <!-- ===== PESTAÑA: PROGRAMACIÓN ===== -->
+    <div class="pane" id="pane-programacion">
+      <div class="card">
+        <h2 style="font-size:17px;margin-bottom:15px">Agregar programa</h2>
+        <form id="addPrograma" class="row">
+          <input type="text" id="npTitulo" placeholder="Título (ej: EL HEREDERO)">
+          <input type="text" id="npCategoria" placeholder="Categoría (ej: DRAMA)">
+          <input type="text" id="npDia" placeholder="Día (ej: LUNES)">
+          <input type="text" id="npHora" placeholder="Hora (ej: 20:00)">
+          <button type="submit" class="btn">Agregar</button>
+        </form>
+      </div>
+      <div class="card">
+        <h2 style="font-size:17px;margin-bottom:15px">Programas</h2>
+        <div id="programasList"></div>
+      </div>
     </div>
   </div>
 <?php endif; ?>
@@ -309,6 +364,102 @@ document.getElementById('addForm').addEventListener('submit', (e) => {
 });
 
 loadBanners();
+
+// ===== Pestañas =====
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.pane').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('pane-' + t.dataset.tab).classList.add('active');
+    if (t.dataset.tab === 'videoportada') loadSettings();
+    if (t.dataset.tab === 'programacion') loadProgramas();
+  });
+});
+
+// ===== Video de portada =====
+async function loadSettings() {
+  const res = await fetch(API + '?action=settings_get');
+  const data = await res.json();
+  if (!data.success) return;
+  document.getElementById('offLink').value = data.settings.off_link || '';
+  document.getElementById('offLoop').checked = parseInt(data.settings.off_loop) === 1;
+}
+async function saveSettings() {
+  const fd = new FormData();
+  fd.append('action', 'settings_save');
+  fd.append('off_link', document.getElementById('offLink').value.trim());
+  fd.append('off_loop', document.getElementById('offLoop').checked ? '1' : '0');
+  const res = await fetch(API, { method: 'POST', body: fd });
+  const data = await res.json();
+  showMsg(data.success ? 'Video de portada guardado ✓' : 'Error al guardar');
+}
+
+// ===== Programación =====
+async function loadProgramas() {
+  const res = await fetch(API + '?action=programas_list');
+  const data = await res.json();
+  if (!data.success) return;
+  const list = document.getElementById('programasList');
+  list.innerHTML = '';
+  if (!data.programas.length) { list.innerHTML = '<div style="color:#777">No hay programas.</div>'; return; }
+  data.programas.forEach(p => {
+    const el = document.createElement('div');
+    el.className = 'programa';
+    el.innerHTML = `
+      <div class="info">
+        <input data-pid="${p.id}" data-f="titulo" value="${(p.titulo||'').replace(/"/g,'&quot;')}">
+        <div class="pf">
+          <input data-pid="${p.id}" data-f="categoria" value="${(p.categoria||'').replace(/"/g,'&quot;')}" placeholder="Categoría">
+          <input data-pid="${p.id}" data-f="dia" value="${(p.dia||'').replace(/"/g,'&quot;')}" placeholder="Día">
+          <input data-pid="${p.id}" data-f="hora" value="${(p.hora||'').replace(/"/g,'&quot;')}" placeholder="Hora">
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-sm" onclick="savePrograma('${p.id}')">Guardar</button>
+        <button class="btn btn-danger btn-sm" onclick="delPrograma('${p.id}')">Eliminar</button>
+      </div>`;
+    list.appendChild(el);
+  });
+}
+async function savePrograma(id) {
+  const g = f => document.querySelector(`input[data-pid="${id}"][data-f="${f}"]`).value.trim();
+  const fd = new FormData();
+  fd.append('action', 'programas_save');
+  fd.append('id', id);
+  fd.append('titulo', g('titulo'));
+  fd.append('categoria', g('categoria'));
+  fd.append('dia', g('dia'));
+  fd.append('hora', g('hora'));
+  const res = await fetch(API, { method: 'POST', body: fd });
+  const data = await res.json();
+  showMsg(data.success ? 'Programa guardado ✓' : (data.error || 'Error'));
+  loadProgramas();
+}
+async function delPrograma(id) {
+  if (!confirm('¿Eliminar este programa?')) return;
+  const fd = new FormData();
+  fd.append('action', 'programas_delete');
+  fd.append('id', id);
+  const res = await fetch(API, { method: 'POST', body: fd });
+  const data = await res.json();
+  showMsg(data.success ? 'Programa eliminado ✓' : 'Error');
+  loadProgramas();
+}
+document.getElementById('addPrograma').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fd = new FormData();
+  fd.append('action', 'programas_save');
+  fd.append('id', 0);
+  fd.append('titulo', document.getElementById('npTitulo').value.trim());
+  fd.append('categoria', document.getElementById('npCategoria').value.trim());
+  fd.append('dia', document.getElementById('npDia').value.trim());
+  fd.append('hora', document.getElementById('npHora').value.trim());
+  const res = await fetch(API, { method: 'POST', body: fd });
+  const data = await res.json();
+  showMsg(data.success ? 'Programa agregado ✓' : (data.error || 'Error'));
+  if (data.success) { document.getElementById('addPrograma').reset(); loadProgramas(); }
+});
 <?php endif; ?>
 </script>
 </body>

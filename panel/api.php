@@ -118,6 +118,52 @@ switch ($action) {
         echo json_encode(['success' => true]);
         break;
 
+    // ===== Video de portada (settings) =====
+    case 'settings_get':
+        $row = $pdo->query('SELECT off_link, off_loop FROM settings WHERE id = 1')->fetch();
+        if (!$row) $row = ['off_link' => '', 'off_loop' => 1];
+        echo json_encode(['success' => true, 'settings' => $row], JSON_UNESCAPED_UNICODE);
+        break;
+
+    case 'settings_save':
+        $offLink = trim($_POST['off_link'] ?? '');
+        $offLoop = (isset($_POST['off_loop']) && $_POST['off_loop'] === '1') ? 1 : 0;
+        $st = $pdo->prepare('REPLACE INTO settings (id, off_link, off_loop) VALUES (1, ?, ?)');
+        $st->execute([$offLink, $offLoop]);
+        echo json_encode(['success' => true]);
+        break;
+
+    // ===== Programación (CRUD) =====
+    case 'programas_list':
+        $rows = $pdo->query('SELECT * FROM programas ORDER BY posicion ASC, id ASC')->fetchAll();
+        echo json_encode(['success' => true, 'programas' => $rows], JSON_UNESCAPED_UNICODE);
+        break;
+
+    case 'programas_save':
+        $id = (int)($_POST['id'] ?? 0);
+        $titulo = trim($_POST['titulo'] ?? '');
+        $categoria = trim($_POST['categoria'] ?? '');
+        $dia = trim($_POST['dia'] ?? '');
+        $hora = trim($_POST['hora'] ?? '');
+        if ($titulo === '') { echo json_encode(['success' => false, 'error' => 'Falta el título']); exit; }
+        if ($id > 0) {
+            $st = $pdo->prepare('UPDATE programas SET titulo=?, categoria=?, dia=?, hora=? WHERE id=?');
+            $st->execute([$titulo, $categoria, $dia, $hora, $id]);
+        } else {
+            $maxPos = (int)$pdo->query('SELECT COALESCE(MAX(posicion),0) FROM programas')->fetchColumn();
+            $st = $pdo->prepare('INSERT INTO programas (titulo, categoria, dia, hora, posicion) VALUES (?,?,?,?,?)');
+            $st->execute([$titulo, $categoria, $dia, $hora, $maxPos + 1]);
+        }
+        echo json_encode(['success' => true]);
+        break;
+
+    case 'programas_delete':
+        $id = (int)($_POST['id'] ?? 0);
+        $st = $pdo->prepare('DELETE FROM programas WHERE id = ?');
+        $st->execute([$id]);
+        echo json_encode(['success' => true]);
+        break;
+
     default:
         echo json_encode(['success' => false, 'error' => 'Acción desconocida']);
 }
