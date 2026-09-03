@@ -1,185 +1,127 @@
-# GalaTV Streaming Website - Development Context
+# GalaTV - Contexto del Proyecto
 
-## Project Overview
+## Qué es
+Sitio web de GalaTV Streaming (https://galatv.com.ar/) con tema dark/gold. Incluye:
+- Página principal con hero (video en vivo de YouTube), programación semanal (carrusel), banners publicitarios.
+- **Panel de administración** (`/panel/`) con login Google y gestión de banners, video de portada y programación.
 
-GalaTV is a streaming platform website designed with a premium dark/gold aesthetic. The project focuses on creating an immersive user experience with animated golden light effects and a responsive layout.
+## Ubicación
+`D:\ia\proyectos\galatv\`
 
-## Development History
+## Infraestructura
+- **Hosting:** Ferozo/DonWeb (PHP 8.x + MySQL). FTP: `c2642305.ferozo.com`.
+- **Dominio:** https://galatv.com.ar/
+- **Repo:** https://github.com/estado3d-svg/galatv (privado).
+- **Deploy automático:** GitHub Actions (`.github/workflows/deploy.yml`) sube a FTP con `curl --ssl-reqd` al hacer push a `main`.
+- **Subida manual al FTP:** `curl --ssl-reqd --user 'c2642305:Argentinaconsalud26/' --upload-file "<archivo>" "ftp://c2642305.ferozo.com/public_html/<ruta>"` (comillas simples, el password tiene `*`).
 
-### Phase 1: Initial Setup
-- Created base HTML structure with header, hero section, and footer
-- Implemented dark/gold color scheme (#050505 background, #FFD700 accents)
-- Added Font Awesome icons for visual elements
+## Estructura de archivos
 
-### Phase 2: Core Sections
-- **Hero Section**: 3-column layout with video player, info, and badges
-- **Benefits Section**: 4-column feature grid with icons
-- **Schedule Section**: Weekly program cards with navigation arrows
-- **Commercial Section**: Contact form for advertising inquiries
+### Raíz (página principal)
+- `index.html` — Página principal (hero, programación carrusel, banners dinámicos, form contacto, footer).
+- `styles.css` — Estilos del sitio (tema, animaciones, carrusel, cards).
+- `script.js` — Scripts auxiliares.
+- `server.js` — Servidor Node local (sirve estáticos en puerto 8000).
+- `banners_api.php` — **Endpoint público** que lee de la BD (banners + settings + programas).
+- `banners.json` — Config de banners (ya NO se usa: la BD es la fuente. Se excluyó del deploy/git).
+- `contacto.php` / `contact.php` — Envío del formulario de contacto por SMTP (PHPMailer).
+- `mail-config.php` — Credenciales SMTP (protegido por `.htaccess`).
+- `.htaccess` — Rewrite de contacto + protección de archivos sensibles.
+- `favicon.svg`, `logo.png`, `logogala.png`, `base.png` — Assets.
+- `gitup.ps1` — Script para commit+push (dispara deploy).
 
-### Phase 3: Advertising Integration
-- Added advertising banner in schedule grid (same size as program cards)
-- Created "ANUNCIE AQUI" advertisement placeholder
-- Implemented commercial contact form with validation
+### Panel (`/panel/`)
+- `index.php` — UI del panel con 3 pestañas (Publicidad, Video de portada, Programación) + login Google.
+- `api.php` — **API interna** (requiere sesión) que lee/escribe la BD.
+- `config.php` — Config del panel + carga `config.local.php`.
+- `config.local.php` — Credenciales reales (Google OAuth + BD). **NO se sube a GitHub** (en `.gitignore`), se sube manual por FTP.
+- `db.php` — Conexión PDO a MySQL.
+- `google-login.php`, `google-callback.php`, `logout.php` — Flujo de login con Google.
+- `.htaccess` — Protege `config.php`, `config.local.php`.
+- `gifs/` — GIFs de banners subidos desde el panel (con `.htaccess` no listable).
+- `img_prog/` — Imágenes de programas subidas (con `.htaccess` no listable, se redimensionan a 333×450).
 
-### Phase 4: Background Effects
-- Implemented golden light trails with CSS gradients
-- Added animated pulsing effects
-- Created moving grid pattern overlay
-- Increased opacity to 60% for better visibility
+### Otros
+- `phpmailer/` — Librería PHPMailer (envío de emails).
+- `assets/` — Imágenes de cards (card1-4, hero, logo, subscription).
 
-### Phase 5: Bilingual Support
-- Added Spanish/English language toggle
-- Implemented translation system with `data-i18n` attributes
-- Translated all UI elements including footer and commercial section
+## Base de datos (MySQL: `c2642305_1`)
 
-### Phase 6: Polish & Optimization
-- Removed navigation arrows from schedule (scroll-based)
-- Fixed scroll behavior with `scroll-padding-top`
-- Simplified footer (removed navigation links)
-- Optimized z-index layering for background effects
+### Tabla `banners`
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| id | INT PK | Identificador |
+| src | VARCHAR | Ruta del archivo (ej: `panel/gifs/banner-1-123.gif`) |
+| link | VARCHAR | URL al clic (vacío = solo imagen) |
+| bodies | TINYINT | 1, 2 o 3 cuerpos (333/666/999px) |
+| alt | VARCHAR | Texto alternativo |
+| position | INT | Orden en la página |
 
-## Technical Stack
+### Tabla `settings` (1 sola fila, id=1)
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| id | PK | Siempre 1 |
+| off_link | VARCHAR | Video de YouTube cuando el canal está OFF |
+| off_loop | TINYINT | 1 = repetir (loop), 0 = no |
+| carousel_speed | INT | Segundos entre cards (1-10) |
+| carousel_auto | TINYINT | 1 = autoavance, 0 = no |
+| programacion_activa | TINYINT | 1 = mostrar sección programación, 0 = ocultar |
 
-### Frontend
-- **HTML5** - Semantic HTML5 markup
-- **CSS3** - Modern CSS with:
-  - CSS Grid Layout
-  - Flexbox
-  - CSS Animations (@keyframes)
-  - CSS Gradients (radial, linear, conic)
-  - CSS Masks
-  - Pseudo-elements (::before, ::after)
+### Tabla `programas`
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| id | INT PK | Identificador |
+| titulo | VARCHAR | Título del programa |
+| categoria | VARCHAR | Categoría (ej: DRAMA) |
+| dias | VARCHAR | Letras separadas por coma: D,L,M,M2,J,V,S |
+| hora | VARCHAR | HH:MM (formato 24h, ej: `20:00`) |
+| imagen | VARCHAR | Ruta imagen del programa (`panel/img_prog/...`) |
+| posicion | INT | Orden en el carrusel |
 
-### JavaScript
-- Vanilla JavaScript (no frameworks)
-- DOM manipulation for language switching
-- Form validation
-- Smooth scroll behavior
+## Funcionalidades
 
-### External Libraries
-- **Font Awesome 6.0** - Icon library (CDN)
-  - Links: `https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css`
+### Página principal
+- **Hero:** reproductor de YouTube. Si hay live → `live_stream?channel=...`; si no → video offline configurable (con loop). Etiqueta EN VIVO (roja) u oculta.
+- **Programación semanal:** carrusel con autoavance (velocidad configurable 1-10s), flechas ‹ ›, máx. 4 cards por fila, texto grande con "hs" en la hora.
+- **Banners:** dinámicos desde BD, agrupados por cuerpos (máx. 3 cuerpos por fila).
+- **Formulario de contacto:** envía por SMTP (PHPMailer) a la cuenta configurada.
+- **Título:** "PROGRAMACIÓN SEMANAL" centrado, dorado con brillo animado.
 
-## Key CSS Techniques
+### Panel (`/panel/`)
+Login con Google (solo `galatvstreaming@gmail.com` y `bodorola@gmail.com`). Pestañas:
+1. **Publicidad:** subir/editar/borrar/reordenar banners (por cuerpos 1-3), con link opcional, barra de progreso.
+2. **Video de portada:** input con link de YouTube (para cuando está OFF) + checkbox "Repetir". Guarda en BD.
+3. **Programación:** CRUD de programas (título, categoría, días en círculos D-L-M-M2-J-V-S, hora 24h, imagen que se redimensiona a 333×450) + config del carrusel (velocidad, auto, mostrar/ocultar sección).
 
-### 1. Golden Light Trails
-```css
-.golden-trails .trail1 {
-  background: radial-gradient(ellipse at 20% 30%, rgba(255, 215, 0, 0.65) 0%, transparent 50%);
-  animation: goldenPulse 10s ease-in-out infinite;
-}
+## Seguridad
+- `config.local.php` (Google OAuth + BD) NO está en git (`.gitignore`), se sube por FTP manualmente. Protegido por `.htaccess` (403).
+- Google OAuth: solo 2 emails permitidos (validados en `google-callback.php`).
+- API key de YouTube: restringida por dominio (`Referer` de galatv.com.ar).
+- Archivos `mail-config.php`, `config.php`, `config.local.php`, `.log` → bloqueados por `.htaccess`.
+
+## Datos de conexión (referencia)
+- FTP: `c2642305.ferozo.com` / `c2642305` / `Argentinaconsalud26/` / carpeta `public_html`.
+- BD: `localhost` / `c2642305_1` / `c2642305_1` / `dq0/***` (en `config.local.php`).
+- SMTP: `mail.galatv.com.ar:587` STARTTLS, user `contacto@galatv.com.ar` (en `mail-config.php`).
+- YouTube: canal `@GalaTvStreaming`, channel ID `UCNbKWLI2_ivAZIAQQ5ot6Ng`, API key en `index.html`.
+
+## Deploy / Push
+```powershell
+cd D:\ia\proyectos\galatv
+.\gitup.ps1 -Message "tu mensaje"   # add + commit + push → dispara deploy automático
 ```
+Para cambios del panel que deben ir al servidor al toque (sin esperar deploy), se suben por curl FTP manual.
 
-### 2. Multiple Gradient Overlays
-```css
-body {
-  background: #050505;
-  /* Golden radial gradients */
-  radial-gradient(ellipse at 5% 85%, rgba(255, 215, 0, 0.95) 0%, transparent 85%),
-  /* Linear gradients for trails */
-  linear-gradient(180deg, rgba(255, 215, 0, 0.25) 0%, transparent 50%);
-}
+## Script útiles
+- `gitup.ps1` — commit + push.
+- `deploy.bat` / `deploy.ps1` / `DEPLOY.md` — métodos de deploy alternativos (legacy).
+- `server.js` — servidor local (puerto 8000).
+
+## Notas / Problemas conocidos
+- Los GIF pesados (`tubarao.gif` 16MB, `bellyco.gif` 35MB) hacen lenta la carga en móvil.
+- `git add` de archivos muy grandes puede crashear en Windows (agregar de a uno).
+- `config.local.php` y `banners.json` deben existir en el servidor (no se suben por git).
 ```
-
-### 3. Z-Index Layering
-```css
-.golden-overlay { z-index: 0; }   /* Background */
-.golden-trails { z-index: 1; }    /* Light effects */
-.content { z-index: 2; }          /* Main content */
-.topbar { z-index: 10; }          /* Fixed header */
-```
-
-## Responsive Breakpoints
-
-- **Desktop**: 1100px+
-- **Tablet**: 760px - 1100px
-- **Mobile**: < 760px
-
-## Color Palette
-
-| Color | Value | Usage |
-|-------|-------|-------|
-| Background | #050505 | Main background |
-| Dark Panel | #080808 | Cards and panels |
-| Gold Primary | #FFD700 | Accents and highlights |
-| Gold Dark | #e9b62e | Secondary gold |
-| Gold Bright | #ffcc4d | Bright highlights |
-| Line | #2c2410 | Borders and dividers |
-| Muted | #a7a7a7 | Secondary text |
-
-## Animation Keyframes
-
-```css
-@keyframes goldenPulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  25% { opacity: 1.3; transform: scale(1.2); }
-  50% { opacity: 1; transform: scale(0.9); }
-  75% { opacity: 1.4; transform: scale(1.25); }
-}
-
-@keyframes goldenTrail {
-  from { transform: rotate(0deg) translate(0, 0); }
-  to { transform: rotate(360deg) translate(-25%, -25%); }
-}
-
-@keyframes goldenGridMove {
-  from { background-position: 0 0; }
-  to { background-position: 100px 100px; }
-}
-```
-
-## File Locations
-
-| File | Purpose |
-|------|---------|
-| `index.html` | Main HTML structure with all sections |
-| `styles.css` | Complete CSS styling with animations |
-| `script.js` | JavaScript for language toggle and form handling |
-| `assets/*.jpg` | Program card images |
-| `logogala.png` | Website logo |
-| `base.jpeg` | Original design reference |
-| `reference.jpg` | Additional design reference |
-
-## Browser Compatibility
-
-Tested and working on:
-- ✅ Chrome 120+
-- ✅ Firefox 120+
-- ✅ Safari 17+
-- ✅ Edge 120+
-
-## Known Issues & Solutions
-
-### Issue: Scroll behavior with fixed header
-**Solution**: Added `scroll-padding-top: 91px` to html element
-
-### Issue: Background effects hidden behind content
-**Solution**: Proper z-index layering (overlay: 0, trails: 1, content: 2)
-
-### Issue: Mobile responsiveness
-**Solution**: Media queries at 1100px and 760px breakpoints
-
-## Future Enhancements
-
-1. Add video autoplay functionality
-2. Implement actual video player controls
-3. Add user authentication
-4. Create admin dashboard for schedule management
-5. Integrate with backend API for real-time updates
-6. Add more interactive animations
-7. Implement loading states
-8. Add accessibility improvements (ARIA labels)
-
-## Notes
-
-- All animations use CSS for better performance
-- No external dependencies except Font Awesome
-- Pure JavaScript implementation
-- Mobile-first responsive design
-- Semantic HTML for better SEO
-- Optimized for dark mode viewing
-
 ---
-Last Updated: 2026
-Project Status: Development Complete
+Última actualización: 2026
+Estado: Funcional

@@ -1,121 +1,90 @@
-# GalaTV Streaming Website
+# GalaTV Streaming
 
-A modern streaming website interface with a dark/gold theme, featuring a responsive design with animations and interactive elements.
+Sitio web de **GalaTV Streaming** (https://galatv.com.ar/) con tema premium **dark/gold**, que muestra el canal en vivo y permite administrar contenido desde un panel.
 
-## Features
+## ✨ Características
 
-- **Hero Section** with live streaming interface
-- **Weekly Schedule** with program cards and advertising space
-- **Commercial Section** with contact form
-- **Dark/Gold Theme** with animated golden light trails
-- **Responsive Design** for mobile and desktop
-- **Bilingual Support** (Spanish/English)
+- **Hero con video en vivo** de YouTube (usa el canal; si está offline reproduce un video de respaldo con loop).
+- **Programación semanal** en carrusel (autoavance, flechas, vel. configurable, máx. 4 cards).
+- **Banners publicitarios** dinámicos (de 1, 2 o 3 cuerpos), con enlace opcional.
+- **Panel de administración** (`/panel/`) con login de Google para gestionar banners, video de portada y programación.
+- **Formulario de contacto** que envía emails por SMTP (PHPMailer).
+- **Tema oscuro/dorado** con fondos de luz dorada, responsive y con toggler de idioma ES/EN.
 
-## Project Structure
+## 🛠️ Stack
+
+| Capa | Tecnología |
+|------|-----------|
+| Frontend | HTML5, CSS3, Vanilla JS, Three.js no (es estático), Font Awesome (CDN) |
+| Backend | PHP 8.x (Ferozo/DonWeb), PDO MySQL |
+| Base de datos | MySQL (`c2642305_1`) |
+| Email | PHPMailer + SMTP |
+| Login | Google OAuth 2.0 (2 usuarios permitidos) |
+| Deploy | GitHub Actions → FTP (curl) |
+
+## 📂 Estructura
 
 ```
 galatv/
-├── index.html          # Main HTML file
-├── styles.css          # Main stylesheet
-├── script.js           # JavaScript functionality
-├── assets/             # Images and assets
-│   ├── card1.jpg       # Program card images
-│   ├── card2.jpg
-│   ├── card3.jpg
-│   ├── card4.jpg
-│   └── logogala.png    # Logo
-├── base.jpeg           # Reference screenshot
-├── reference.jpg       # Design reference
-└── logogala.png        # Logo file
+├── index.html              # Página principal
+├── styles.css              # Estilos
+├── script.js               # Scripts auxiliares
+├── banners_api.php         # Endpoint público (BD: banners + settings + programas)
+├── contacto.php / contact.php  # Formulario de contacto (SMTP)
+├── mail-config.php         # Credenciales SMTP (protegido)
+├── server.js               # Servidor local (puerto 8000)
+├── .htaccess               # Protección + rewrite
+├── gitup.ps1               # Commit + push (dispara deploy)
+├── panel/                  # Panel de administración
+│   ├── index.php           # UI (3 pestañas) + login
+│   ├── api.php             # API interna (requiere sesión)
+│   ├── config.php          # Config
+│   ├── config.local.php    # Credenciales (NO en git)
+│   ├── db.php              # Conexión PDO
+│   ├── google-login.php / google-callback.php / logout.php
+│   ├── gifs/               # GIFs de banners subidos
+│   └── img_prog/           # Imágenes de programas subidas
+└── assets/                 # Imágenes
 ```
 
-## Technologies Used
+## 🚀 Puesta en marcha
 
-- **HTML5** - Semantic markup
-- **CSS3** - Modern styling with gradients and animations
-- **JavaScript** - Interactive functionality
-- **Font Awesome** - Icon library (CDN)
-
-## Key Features
-
-### Visual Design
-- Dark background (#050505) with golden accents (#FFD700)
-- Animated golden light trails and pulsing effects
-- Radial gradient overlays for atmospheric lighting
-- Responsive grid layout
-- Smooth scroll behavior
-
-### Sections
-1. **Header** - Logo, navigation, language selector
-2. **Hero** - Live streaming player with progress bar
-3. **Benefits** - 4-column feature grid
-4. **Schedule** - Weekly program cards with ad space
-5. **Commercial** - Advertising contact form
-6. **Footer** - Logo and social media links
-
-### Interactive Elements
-- Language toggle (ES/EN)
-- Contact form with validation
-- Smooth navigation
-- Animated background effects
-
-## Getting Started
-
-### Local Development
-
-1. Clone the repository:
+### Local (servidor Node)
 ```bash
 cd D:\ia\proyectos\galatv
+node server.js
+# abrir http://127.0.0.1:8000
 ```
 
-2. Start the local server:
-```bash
-npx http-server -p 8000
+### Despliegue (automático)
+```powershell
+.\gitup.ps1 -Message "tu mensaje"   # commit + push → GitHub Actions sube a FTP
 ```
 
-3. Open in browser:
-```
-http://127.0.0.1:8000
-```
+### Panel
+- URL: https://galatv.com.ar/panel/
+- Login con Google (solo `galatvstreaming@gmail.com` y `bodorola@gmail.com`).
+- Pestañas:
+  1. **Publicidad** — subir/editar/borrar/reordenar banners.
+  2. **Video de portada** — link de video offline + opción "Repetir".
+  3. **Programación** — CRUD de programas + config del carrusel (velocidad, auto, mostrar/ocultar).
 
-### Files to Edit
+## 🗄️ Base de datos
 
-- `index.html` - Main HTML structure
-- `styles.css` - Styling and animations
-- `script.js` - JavaScript functionality
+Tablas: `banners`, `settings` (off_link, off_loop, carousel_speed, carousel_auto, programacion_activa), `programas` (titulo, categoria, dias, hora, imagen, posicion).
 
-## Styling Highlights
+## 🔒 Seguridad
 
-```css
-/* Golden light trails overlay */
-.golden-trails {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1;
-  animation: goldenPulse 10s ease-in-out infinite;
-}
+- `config.local.php` (Google OAuth + BD) no se sube a GitHub (`.gitignore`), se sube por FTP manual.
+- Google OAuth restringido a 2 emails.
+- API key de YouTube limitada por dominio.
+- Archivos sensibles protegidos por `.htaccess` (403).
 
-/* Animated background */
-body {
-  background: #050505;
-  color: #fff;
-  font-family: Arial, Helvetica, sans-serif;
-}
-```
+## 📝 Notas
 
-## Browser Support
+- Los GIF grandes (bellyco 35MB, tubarao 16MB) pueden hacer lenta la carga en móvil.
+- Para cambios urgentes del panel, se suben por curl FTP manual (sin esperar el deploy).
 
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
+## 📄 Licencia
 
-## License
-
-© 2026 GalaTV. All rights reserved.
-
----
-Created for GalaTV Streaming Platform
+© 2026 GalaTV. Todos los derechos reservados.
