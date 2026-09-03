@@ -462,23 +462,35 @@
         if (!container) return;
         container.innerHTML = '';
 
-        // Separar grandes (666) de chicos (333)
-        const bigs = banners.filter(b => b.row === 2 || b.width >= 666);
-        const smalls = banners.filter(b => !(b.row === 2 || b.width >= 666));
-
-        // Cada fila de chicos lleva máximo 3
-        for (let i = 0; i < smalls.length; i += 3) {
-          const chunk = smalls.slice(i, i + 3);
-          container.appendChild(makeRow(chunk));
-        }
-
-        // Los grandes van cada uno en su propia fila
-        bigs.forEach(b => {
-          container.appendChild(makeRow([b]));
-        });
+        // Agrupar en filas de hasta 3 "unidades" (banner 333 = 1, banner 666 = 2)
+        const rows = groupBannersIntoRows(banners);
+        rows.forEach(r => container.appendChild(makeRow(r)));
       } catch (e) {
         console.error('Error cargando banners:', e);
       }
+    }
+
+    function units(b) { return (b.row === 2 || b.width >= 666) ? 2 : 1; }
+
+    function groupBannersIntoRows(banners) {
+      // Ordenar: los grandes primero para no dejar huecos (greedy)
+      const sorted = [...banners].sort((a, b) => units(b) - units(a));
+      const rows = [];
+      let current = [];
+      let acc = 0;
+      for (const b of sorted) {
+        const u = units(b);
+        if (acc + u <= 3) {
+          current.push(b);
+          acc += u;
+        } else {
+          if (current.length) rows.push(current);
+          current = [b];
+          acc = u;
+        }
+      }
+      if (current.length) rows.push(current);
+      return rows;
     }
 
     function makeRow(banners) {

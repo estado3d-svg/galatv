@@ -22,7 +22,15 @@ function loadBanners() {
 function saveBanners($banners) {
     $file = BANNERS_FILE;
     $json = json_encode(['banners' => $banners], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-    return file_put_contents($file, $json) !== false;
+    if ($json === false) {
+        @file_put_contents(__DIR__ . '/debug.log', date('c') . ' json_encode_fail: ' . json_last_error_msg() . "\n", FILE_APPEND);
+        return false;
+    }
+    $r = file_put_contents($file, $json);
+    if ($r === false) {
+        @file_put_contents(__DIR__ . '/debug.log', date('c') . ' write_fail: ' . $file . "\n", FILE_APPEND);
+    }
+    return $r !== false;
 }
 
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
