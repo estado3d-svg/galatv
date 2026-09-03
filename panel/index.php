@@ -143,15 +143,15 @@ $email = $_SESSION['email'] ?? '';
         <form id="addPrograma" class="row" style="flex-direction:column;align-items:flex-start">
           <div style="display:flex;gap:10px;width:100%;flex-wrap:wrap;align-items:flex-end">
             <input type="text" id="npTitulo" placeholder="Título (ej: EL HEREDERO)" style="flex:1;min-width:150px">
-            <input type="text" id="npCategoria" placeholder="Categoría (ej: DRAMA)" style="flex:1;min-width:130px">
-            <div style="display:flex;gap:5px;align-items:center">
-              <input type="number" id="npHh" min="1" max="12" placeholder="HH" style="width:60px" title="Hora">
-              <span style="color:#888">:</span>
-              <input type="number" id="npMm" min="0" max="59" placeholder="MM" value="00" style="width:60px" title="Minutos">
-              <select id="npAmpm" style="background:#111;border:1px solid #2c2410;color:#ddd;padding:9px 8px;border-radius:4px;font-size:13px">
-                <option value="AM">AM</option>
-                <option value="PM">PM</option>
-              </select>
+            <input type="text" id="npCategoria" placeholder="Categoría (ej: DRAMA)" style="flex:1;min-width:120px">
+            <input type="number" id="npHh" min="0" max="23" placeholder="HH" style="flex:0 0 64px;background:#111;border:1px solid #2c2410;color:#ddd;padding:9px 10px;border-radius:4px;font-size:13px" title="Hora (0-23)">
+            <span style="color:#888;font-size:16px">:</span>
+            <input type="number" id="npMm" min="0" max="59" placeholder="MM" value="00" style="flex:0 0 64px;background:#111;border:1px solid #2c2410;color:#ddd;padding:9px 10px;border-radius:4px;font-size:13px" title="Minutos">
+            <div style="display:flex;flex-direction:column">
+              <label style="font-size:11px;color:#FFD700;margin-bottom:3px">Imagen</label>
+              <button type="button" class="btn btn-ghost btn-sm" onclick="pickNewProgImage()">Elegir imagen</button>
+              <input type="file" id="npImage" accept=".gif,.png,.jpg,.jpeg,.webp" style="display:none">
+              <span id="npImgName" style="font-size:11px;color:#888;margin-top:3px"></span>
             </div>
           </div>
           <div class="dias" id="npDias">
@@ -164,7 +164,7 @@ $email = $_SESSION['email'] ?? '';
             <span class="dia" data-d="S">S</span>
           </div>
           <input type="hidden" id="npDiasVal">
-          <button type="submit" class="btn">Agregar</button>
+          <button type="submit" class="btn">Agregar programa</button>
         </form>
       </div>
       <div class="card">
@@ -438,13 +438,9 @@ loadBanners();
             <div class="pf">
               <input data-pid="${p.id}" data-f="categoria" value="${(p.categoria||'').replace(/"/g,'&quot;')}" placeholder="Categoría">
               <div style="display:flex;gap:5px;align-items:center">
-                <input type="number" data-pid="${p.id}" data-f="hh" min="1" max="12" value="${hp.hh}" style="width:55px" placeholder="HH">
+                <input type="number" data-pid="${p.id}" data-f="hh" min="0" max="23" value="${hp.hh}" style="flex:0 0 58px;background:#111;border:1px solid #2c2410;color:#ddd;padding:7px 9px;border-radius:4px;font-size:12px" placeholder="HH">
                 <span style="color:#888">:</span>
-                <input type="number" data-pid="${p.id}" data-f="mm" min="0" max="59" value="${hp.mm}" style="width:55px" placeholder="MM">
-                <select data-pid="${p.id}" data-f="ampm" style="background:#111;border:1px solid #2c2410;color:#ddd;padding:7px 8px;border-radius:4px;font-size:12px">
-                  <option value="AM" ${hp.ampm==='AM'?'selected':''}>AM</option>
-                  <option value="PM" ${hp.ampm==='PM'?'selected':''}>PM</option>
-                </select>
+                <input type="number" data-pid="${p.id}" data-f="mm" min="0" max="59" value="${hp.mm}" style="flex:0 0 58px;background:#111;border:1px solid #2c2410;color:#ddd;padding:7px 9px;border-radius:4px;font-size:12px" placeholder="MM">
               </div>
             </div>
             <div class="dias" id="dias-${p.id}">
@@ -463,32 +459,28 @@ loadBanners();
     }
 
     function parseHora(hora) {
-      let hh = '12', mm = '00', ampm = 'PM';
-      const m = String(hora || '').trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+      const m = String(hora || '').trim().match(/^(\d{1,2}):(\d{2})/);
       if (m) {
-        hh = String(parseInt(m[1], 10)).padStart(2, '0');
-        mm = m[2] || '00';
-        ampm = (m[3] || 'PM').toUpperCase();
+        return { hh: String(parseInt(m[1], 10)).padStart(2, '0'), mm: m[2] || '00' };
       }
-      return { hh, mm, ampm };
+      return { hh: '00', mm: '00' };
     }
 
-    function buildHora(hh, mm, ampm) {
-      const h = String(parseInt(hh || '12', 10) || 12).padStart(2, '0');
+    function buildHora(hh, mm) {
+      const h = String(parseInt(hh || '0', 10) || 0).padStart(2, '0');
       const mi = String(parseInt(mm || '0', 10) || 0).padStart(2, '0');
-      return h + ':' + mi + ' ' + (ampm || 'PM').toUpperCase();
+      return h + ':' + mi;
     }
 
     async function savePrograma(id) {
       const g = f => document.querySelector(`input[data-pid="${id}"][data-f="${f}"]`).value.trim();
-      const sel = f => document.querySelector(`select[data-pid="${id}"][data-f="${f}"]`).value;
       const fd = new FormData();
       fd.append('action', 'programas_save');
       fd.append('id', id);
       fd.append('titulo', g('titulo'));
       fd.append('categoria', g('categoria'));
       fd.append('dias', diasStringFromSel('dias-' + id));
-      fd.append('hora', buildHora(g('hh'), g('mm'), sel('ampm')));
+      fd.append('hora', buildHora(g('hh'), g('mm')));
       const res = await fetch(API, { method: 'POST', body: fd });
       const data = await res.json();
       showMsg(data.success ? 'Programa guardado ✓' : (data.error || 'Error'));
@@ -532,16 +524,45 @@ loadBanners();
       fd.append('titulo', document.getElementById('npTitulo').value.trim());
       fd.append('categoria', document.getElementById('npCategoria').value.trim());
       fd.append('dias', diasStringFromSel('npDias'));
-      fd.append('hora', buildHora(document.getElementById('npHh').value, document.getElementById('npMm').value, document.getElementById('npAmpm').value));
+      fd.append('hora', buildHora(document.getElementById('npHh').value, document.getElementById('npMm').value));
       const res = await fetch(API, { method: 'POST', body: fd });
       const data = await res.json();
-      showMsg(data.success ? 'Programa agregado ✓' : (data.error || 'Error'));
       if (data.success) {
+        // Si se eligió imagen, subirla al programa recién creado
+        const imgFile = document.getElementById('npImage').files[0];
+        if (imgFile) {
+          const cols = await (await fetch(API + '?action=programas_list')).json();
+          const nuevo = cols.programas[cols.programas.length - 1];
+          if (nuevo && nuevo.id) {
+            const ifd = new FormData();
+            ifd.append('action', 'programas_image');
+            ifd.append('id', nuevo.id);
+            ifd.append('file', imgFile);
+            await new Promise(resolve => {
+              const xhr = new XMLHttpRequest();
+              xhr.open('POST', API);
+              xhr.onload = resolve;
+              xhr.send(ifd);
+            });
+          }
+        }
+        showMsg('Programa agregado ✓');
         document.getElementById('addPrograma').reset();
         document.getElementById('npMm').value = '00';
+        document.getElementById('npImgName').textContent = '';
         document.querySelectorAll('#npDias .dia').forEach(d => d.classList.remove('on'));
         loadProgramas();
+      } else {
+        showMsg(data.error || 'Error al agregar');
       }
+    });
+
+    // Elegir imagen para el nuevo programa
+    function pickNewProgImage() {
+      document.getElementById('npImage').click();
+    }
+    document.getElementById('npImage').addEventListener('change', function() {
+      document.getElementById('npImgName').textContent = this.files.length ? '✅ ' + this.files[0].name : '';
     });
 
     bindDias('npDias');
