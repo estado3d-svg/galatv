@@ -159,6 +159,10 @@ $email = $_SESSION['email'] ?? '';
             <input type="checkbox" id="carAuto" checked style="width:18px;height:18px;accent-color:#FFD700">
             Movimiento automático
           </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#ddd;cursor:pointer">
+            <input type="checkbox" id="carActiva" checked style="width:18px;height:18px;accent-color:#FFD700">
+            Mostrar programación en el sitio
+          </label>
           <button class="btn" onclick="saveCarousel()">Guardar carrusel</button>
         </div>
       </div>
@@ -470,11 +474,13 @@ loadBanners();
       const s = data.settings;
       document.getElementById('carSpeed').value = s.carousel_speed || 3;
       document.getElementById('carAuto').checked = parseInt(s.carousel_auto) === 1;
+      document.getElementById('carActiva').checked = parseInt(s.programacion_activa) === 1;
       document.getElementById('speedVal').textContent = s.carousel_speed || 3;
     }
     async function saveCarousel() {
       const speed = document.getElementById('carSpeed').value;
       const auto = document.getElementById('carAuto').checked ? '1' : '0';
+      const activa = document.getElementById('carActiva').checked ? '1' : '0';
       // traer off_link/off_loop existentes para no pisarlos
       const cur = await (await fetch(API + '?action=settings_get')).json();
       const s = cur.settings || {};
@@ -484,9 +490,18 @@ loadBanners();
       fd.append('off_loop', s.off_loop || '1');
       fd.append('carousel_speed', speed);
       fd.append('carousel_auto', auto);
+      fd.append('programacion_activa', activa);
       const res = await fetch(API, { method: 'POST', body: fd });
       const data = await res.json();
-      showMsg(data.success ? 'Carrusel guardado ✓' : 'Error al guardar', data.success ? 'ok' : 'error');
+      if (data.success) {
+        if (activa === '0') {
+          showMsg('Programación desactivada. Ya no se mostrará en el sitio.', 'ok');
+        } else {
+          showMsg('Programación visible en el sitio ✓', 'ok');
+        }
+      } else {
+        showMsg('Error al guardar', 'error');
+      }
     }
     // actualizar el texto de velocidad
     try {

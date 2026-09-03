@@ -89,14 +89,16 @@
     </section>
 
     <section id="programacion" class="schedule">
-      <div class="section-head">
-        <h3 class="section-title" data-i18n="PROGRAMACIÓN SEMANAL">PROGRAMACIÓN SEMANAL</h3>
-      </div>
+      <div id="programacionBlock">
+        <div class="section-head">
+          <h3 class="section-title" data-i18n="PROGRAMACIÓN SEMANAL">PROGRAMACIÓN SEMANAL</h3>
+        </div>
 
-      <div class="carousel">
-        <button class="car-nav car-prev" id="carPrev" aria-label="Anterior">‹</button>
-        <div class="car-track" id="programasGrid"></div>
-        <button class="car-nav car-next" id="carNext" aria-label="Siguiente">›</button>
+        <div class="carousel">
+          <button class="car-nav car-prev" id="carPrev" aria-label="Anterior">‹</button>
+          <div class="car-track" id="programasGrid"></div>
+          <button class="car-nav car-next" id="carNext" aria-label="Siguiente">›</button>
+        </div>
       </div>
 
       <div class="banners-container" id="bannersContainer"></div>
@@ -479,6 +481,12 @@
       if (settings.off_loop !== undefined) {
         // guardar estado de loop (lo usa la lógica si se recarga)
         document.body.dataset.offLoop = settings.off_loop;
+      }
+      // Mostrar/ocultar la sección de programación (título + carrusel)
+      const block = document.getElementById('programacionBlock');
+      if (block) {
+        const mostrar = parseInt(settings.programacion_activa) === 1;
+        block.style.display = mostrar ? 'block' : 'none';
       }
     }
 
