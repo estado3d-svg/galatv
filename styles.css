@@ -108,8 +108,9 @@ button{cursor:pointer}
 .benefits-item i{color:#FFD700;font-size:34px;text-shadow:0 0 15px rgba(255,215,0,0.6);display:inline-block}
 .benefits-device i{color:#FFD700;font-size:34px;text-shadow:0 0 15px rgba(255,215,0,0.6);display:inline-block;margin-right:8px}
 .schedule{max-width:1510px;margin:15px auto 0;padding:0 36px 20px}
-.section-head{display:flex;justify-content:space-between;align-items:center}
-.section-head h3{font-size:16px;font-weight:400;margin:0 0 10px}
+.section-head{display:flex;justify-content:center;align-items:center;margin-bottom:20px}
+.section-head h3{font-size:28px;font-weight:700;margin:0;letter-spacing:2px;text-align:center;color:#FFD700;text-shadow:0 0 15px rgba(255,215,0,.5),0 0 30px rgba(255,215,0,.2);animation:titleGlow 3s ease-in-out infinite}
+@keyframes titleGlow{0%,100%{text-shadow:0 0 15px rgba(255,215,0,.5),0 0 30px rgba(255,215,0,.2)}50%{text-shadow:0 0 25px rgba(255,215,0,.9),0 0 50px rgba(255,215,0,.4)}}
 .arrows{display:flex;gap:8px}
 .arrows button{width:32px;height:32px;border-radius:50%;border:1px solid #4a3b14;background:#060606;color:#e5b932;font-size:24px;line-height:1}
 .carousel{position:relative;display:flex;align-items:center;gap:8px}
