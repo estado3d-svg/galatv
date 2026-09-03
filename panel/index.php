@@ -41,10 +41,21 @@ $email = $_SESSION['email'] ?? '';
   form.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
   form.row input[type=text]{background:#111;border:1px solid #2c2410;color:#ddd;padding:9px 12px;border-radius:4px;font-size:13px;flex:1;min-width:180px}
   .msg{position:fixed;top:15px;right:15px;background:#17130a;border:1px solid #8d681c;color:#f4c747;padding:12px 18px;border-radius:5px;display:none;z-index:99}
+  .loading-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;flex-direction:column;z-index:1000;color:#fff;text-align:center;padding:20px}
+  .loading-overlay.show{display:flex}
+  .loading-overlay p{color:#ccc;margin-bottom:15px;font-size:14px}
+  .progress-track{width:320px;max-width:90%;height:10px;background:#1c1c1c;border-radius:5px;overflow:hidden;border:1px solid #333}
+  .progress-bar{height:100%;width:0%;background:linear-gradient(90deg,#e9b62e,#FFD700);transition:width .2s}
+  .loading-overlay .pct{font-size:13px;color:#c9a94a;margin-top:10px}
 </style>
 </head>
 <body>
 <div class="msg" id="msg"></div>
+<div class="loading-overlay" id="loadingOverlay">
+  <p id="loadingText">Subiendo banner...</p>
+  <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+  <div class="pct" id="progressPct">0%</div>
+</div>
 
 <?php if (!$logged): ?>
   <div class="login-box">
@@ -169,12 +180,47 @@ function changeImage(id) {
     fd.append('action', 'update_image');
     fd.append('id', id);
     fd.append('file', input.files[0]);
-    const res = await fetch(API, { method: 'POST', body: fd });
-    const data = await res.json();
-    showMsg(data.success ? 'Imagen actualizada ✓' : (data.error || 'Error'));
-    loadBanners();
+    uploadWithProgress(fd, data => {
+      showMsg(data.success ? 'Imagen actualizada ✓' : (data.error || 'Error'));
+      loadBanners();
+      hideLoading();
+    });
   };
   input.click();
+}
+
+// Upload con XMLHttpRequest: muestra barra de progreso y bloquea la UI
+function showLoading(text) {
+  document.getElementById('loadingText').textContent = text || 'Subiendo banner...';
+  document.getElementById('loadingOverlay').classList.add('show');
+  document.getElementById('progressBar').style.width = '0%';
+  document.getElementById('progressPct').textContent = '0%';
+}
+function hideLoading() {
+  document.getElementById('loadingOverlay').classList.remove('show');
+}
+function uploadWithProgress(formData, onDone) {
+  showLoading();
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', API);
+  xhr.upload.onprogress = (e) => {
+    if (e.lengthComputable) {
+      const pct = Math.round((e.loaded / e.total) * 100);
+      document.getElementById('progressBar').style.width = pct + '%';
+      document.getElementById('progressPct').textContent = pct + '%';
+    }
+  };
+  xhr.onload = () => {
+    let data = {};
+    try { data = JSON.parse(xhr.responseText); } catch (e) {}
+    if (onDone) onDone(data);
+  };
+  xhr.onerror = () => {
+    hideLoading();
+    showMsg('Error de conexión al subir');
+    if (onDone) onDone({ success: false, error: 'Error de conexión' });
+  };
+  xhr.send(formData);
 }
 
 // Drag & drop / seleccionar para nuevo banner
@@ -190,7 +236,7 @@ drop.addEventListener('drop', e => {
 });
 fileInput.addEventListener('change', () => { if (fileInput.files.length) { pendingFile = fileInput.files[0]; drop.textContent = '✅ ' + pendingFile.name; } });
 
-document.getElementById('addForm').addEventListener('submit', async (e) => {
+document.getElementById('addForm').addEventListener('submit', (e) => {
   e.preventDefault();
   if (!pendingFile) { showMsg('Elegí un archivo primero'); return; }
   const fd = new FormData();
@@ -198,13 +244,14 @@ document.getElementById('addForm').addEventListener('submit', async (e) => {
   fd.append('file', pendingFile);
   fd.append('link', document.getElementById('newLink').value.trim());
   fd.append('alt', document.getElementById('newAlt').value.trim() || 'Banner');
-  const res = await fetch(API, { method: 'POST', body: fd });
-  const data = await res.json();
-  showMsg(data.success ? 'Banner agregado ✓' : (data.error || 'Error'));
-  loadBanners();
-  document.getElementById('addForm').reset();
-  pendingFile = null;
-  drop.textContent = '📥 Arrastrá un GIF/PNG aquí, o clickeá para elegir';
+  uploadWithProgress(fd, data => {
+    showMsg(data.success ? 'Banner agregado ✓' : (data.error || 'Error'));
+    loadBanners();
+    hideLoading();
+    document.getElementById('addForm').reset();
+    pendingFile = null;
+    drop.textContent = '📥 Arrastrá un GIF/PNG aquí, o clickeá para elegir';
+  });
 });
 
 loadBanners();

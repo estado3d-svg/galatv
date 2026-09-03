@@ -475,23 +475,33 @@
           img.src = b.src;
           img.alt = b.alt || '';
 
-          const target = b.row === 2 ? row2 : row1;
-
-          if (b.link) {
-            const a = document.createElement('a');
-            a.href = b.link;
-            a.target = '_blank';
-            a.rel = 'noopener noreferrer';
-            a.className = 'banner-link';
-            a.appendChild(img);
-            target.appendChild(a);
+          // Fila 2 = banner grande, fila 1 = resto. Máximo 3 por fila.
+          const isBig = b.row === 2 || b.width >= 666;
+          if (isBig) {
+            if (row2.children.length < 1) {
+              const wrap = b.link ? buildLink(img, b.link) : img;
+              row2.appendChild(wrap);
+            }
           } else {
-            target.appendChild(img);
+            if (row1.children.length < 3) {
+              const wrap = b.link ? buildLink(img, b.link) : img;
+              row1.appendChild(wrap);
+            }
           }
         });
       } catch (e) {
         console.error('Error cargando banners:', e);
       }
+    }
+
+    function buildLink(img, href) {
+      const a = document.createElement('a');
+      a.href = href;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.className = 'banner-link';
+      a.appendChild(img);
+      return a;
     }
 
     loadBanners();
