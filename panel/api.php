@@ -16,6 +16,13 @@ header('Content-Type: application/json; charset=UTF-8');
 $pdo = db();
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 
+// Carpeta donde se guardan los GIFs subidos desde el panel
+$GIF_DIR = __DIR__ . '/gifs';
+$GIF_URL = 'panel/gifs';
+if (!is_dir($GIF_DIR)) { @mkdir($GIF_DIR, 0775, true); }
+
+function bannerSrc($gifUrl, $filename) { return $gifUrl . '/' . $filename; }
+
 function fetchAllBanners($pdo) {
     return $pdo->query('SELECT * FROM banners ORDER BY position ASC, id ASC')->fetchAll();
 }
@@ -52,15 +59,18 @@ switch ($action) {
         $ext = strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION));
         if (!in_array($ext, ['gif','png','jpg','jpeg'])) { echo json_encode(['success' => false, 'error' => 'Formato no permitido. Usá GIF, PNG o JPG.']); exit; }
         $filename = 'banner-' . $id . '-' . time() . '.' . $ext;
-        $dest = SITE_ROOT . '/' . $filename;
+        $dest = $GIF_DIR . '/' . $filename;
         if (!move_uploaded_file($_FILES['file']['tmp_name'], $dest)) { echo json_encode(['success' => false, 'error' => 'No se pudo guardar el archivo']); exit; }
         // borrar imagen anterior si es propia del panel
         $prev = $pdo->prepare('SELECT src FROM banners WHERE id = ?');
         $prev->execute([$id]);
         $oldSrc = $prev->fetchColumn();
-        if ($oldSrc && strpos($oldSrc, 'banner-') === 0 && file_exists(SITE_ROOT . '/' . $oldSrc)) @unlink(SITE_ROOT . '/' . $oldSrc);
+        if ($oldSrc && strpos($oldSrc, 'panel/gifs/') === 0) {
+            $oldFile = SITE_ROOT . '/' . $oldSrc;
+            if (file_exists($oldFile)) @unlink($oldFile);
+        }
         $st = $pdo->prepare('UPDATE banners SET src = ? WHERE id = ?');
-        $st->execute([$filename, $id]);
+        $st->execute([bannerSrc($GIF_URL, $filename), $id]);
         echo json_encode(['success' => true]);
         break;
 
@@ -73,11 +83,11 @@ switch ($action) {
         $ext = strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION));
         if (!in_array($ext, ['gif','png','jpg','jpeg'])) { echo json_encode(['success' => false, 'error' => 'Formato no permitido. Usá GIF, PNG o JPG.']); exit; }
         $filename = 'banner-' . time() . '.' . $ext;
-        $dest = SITE_ROOT . '/' . $filename;
+        $dest = $GIF_DIR . '/' . $filename;
         if (!move_uploaded_file($_FILES['file']['tmp_name'], $dest)) { echo json_encode(['success' => false, 'error' => 'No se pudo guardar el archivo']); exit; }
         $maxPos = (int)$pdo->query('SELECT COALESCE(MAX(position),0) FROM banners')->fetchColumn();
         $st = $pdo->prepare('INSERT INTO banners (src, link, bodies, alt, position) VALUES (?,?,?,?,?)');
-        $st->execute([$filename, $link, $bodies, $alt, $maxPos + 1]);
+        $st->execute([bannerSrc($GIF_URL, $filename), $link, $bodies, $alt, $maxPos + 1]);
         echo json_encode(['success' => true]);
         break;
 
@@ -87,7 +97,10 @@ switch ($action) {
         $prev = $pdo->prepare('SELECT src FROM banners WHERE id = ?');
         $prev->execute([$id]);
         $oldSrc = $prev->fetchColumn();
-        if ($oldSrc && strpos($oldSrc, 'banner-') === 0 && file_exists(SITE_ROOT . '/' . $oldSrc)) @unlink(SITE_ROOT . '/' . $oldSrc);
+        if ($oldSrc && strpos($oldSrc, 'panel/gifs/') === 0) {
+            $oldFile = SITE_ROOT . '/' . $oldSrc;
+            if (file_exists($oldFile)) @unlink($oldFile);
+        }
         $st = $pdo->prepare('DELETE FROM banners WHERE id = ?');
         $st->execute([$id]);
         echo json_encode(['success' => true]);

@@ -1,0 +1,2 @@
+# Permitir servir imágenes/GIF pero no listar el directorio
+Options -Indexes
