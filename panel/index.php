@@ -46,6 +46,8 @@ $email = $_SESSION['email'] ?? '';
   .loading-overlay p{color:#ccc;margin-bottom:15px;font-size:14px}
   .progress-track{width:320px;max-width:90%;height:10px;background:#1c1c1c;border-radius:5px;overflow:hidden;border:1px solid #333}
   .progress-bar{height:100%;width:0%;background:linear-gradient(90deg,#e9b62e,#FFD700);transition:width .2s}
+  .progress-bar.indeterminate{width:40%;animation:progSlide 1s ease-in-out infinite}
+  @keyframes progSlide{0%{margin-left:-40%}100%{margin-left:100%}}
   .loading-overlay .pct{font-size:13px;color:#c9a94a;margin-top:10px}
   .tabs{display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid #2c2410;padding-bottom:12px}
   .tab{background:transparent;border:1px solid #2c2410;color:#aaa;padding:10px 20px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:bold}
@@ -368,16 +370,22 @@ function changeImage(id) {
 
 // Upload con XMLHttpRequest: muestra barra de progreso y bloquea la UI
 function showLoading(text) {
-  document.getElementById('loadingText').textContent = text || 'Subiendo banner...';
+  document.getElementById('loadingText').textContent = text || 'Cargando...';
   document.getElementById('loadingOverlay').classList.add('show');
-  document.getElementById('progressBar').style.width = '0%';
-  document.getElementById('progressPct').textContent = '0%';
+  const pb = document.getElementById('progressBar');
+  pb.classList.add('indeterminate');
+  document.getElementById('progressPct').textContent = '';
 }
 function hideLoading() {
   document.getElementById('loadingOverlay').classList.remove('show');
+  const pb = document.getElementById('progressBar');
+  pb.classList.remove('indeterminate');
 }
 function uploadWithProgress(formData, onDone) {
-  showLoading();
+  showLoading('Subiendo banner...');
+  const pb = document.getElementById('progressBar');
+  pb.classList.remove('indeterminate');
+  document.getElementById('progressPct').textContent = '0%';
   const xhr = new XMLHttpRequest();
   xhr.open('POST', API);
   xhr.upload.onprogress = (e) => {
@@ -478,29 +486,36 @@ loadBanners();
       document.getElementById('speedVal').textContent = s.carousel_speed || 3;
     }
     async function saveCarousel() {
-      const speed = document.getElementById('carSpeed').value;
-      const auto = document.getElementById('carAuto').checked ? '1' : '0';
-      const activa = document.getElementById('carActiva').checked ? '1' : '0';
-      // traer off_link/off_loop existentes para no pisarlos
-      const cur = await (await fetch(API + '?action=settings_get')).json();
-      const s = cur.settings || {};
-      const fd = new FormData();
-      fd.append('action', 'settings_save');
-      fd.append('off_link', s.off_link || '');
-      fd.append('off_loop', s.off_loop || '1');
-      fd.append('carousel_speed', speed);
-      fd.append('carousel_auto', auto);
-      fd.append('programacion_activa', activa);
-      const res = await fetch(API, { method: 'POST', body: fd });
-      const data = await res.json();
-      if (data.success) {
-        if (activa === '0') {
-          showMsg('Programación desactivada. Ya no se mostrará en el sitio.', 'ok');
+      showLoading('Guardando carrusel...');
+      try {
+        const speed = document.getElementById('carSpeed').value;
+        const auto = document.getElementById('carAuto').checked ? '1' : '0';
+        const activa = document.getElementById('carActiva').checked ? '1' : '0';
+        // traer off_link/off_loop existentes para no pisarlos
+        const cur = await (await fetch(API + '?action=settings_get')).json();
+        const s = cur.settings || {};
+        const fd = new FormData();
+        fd.append('action', 'settings_save');
+        fd.append('off_link', s.off_link || '');
+        fd.append('off_loop', s.off_loop || '1');
+        fd.append('carousel_speed', speed);
+        fd.append('carousel_auto', auto);
+        fd.append('programacion_activa', activa);
+        const res = await fetch(API, { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) {
+          if (activa === '0') {
+            showMsg('Programación desactivada. Ya no se mostrará en el sitio.', 'ok');
+          } else {
+            showMsg('Programación visible en el sitio ✓', 'ok');
+          }
         } else {
-          showMsg('Programación visible en el sitio ✓', 'ok');
+          showMsg('Error al guardar', 'error');
         }
-      } else {
+      } catch (e) {
         showMsg('Error al guardar', 'error');
+      } finally {
+        hideLoading();
       }
     }
     // actualizar el texto de velocidad
