@@ -15,7 +15,8 @@ jobs:
       - name: Prepare files
         run: |
           mkdir -p /tmp/deploy
-          rsync -a --exclude='.git' --exclude='.github' --exclude='node_modules' --exclude='.gitignore' --exclude='*.log' ./ /tmp/deploy/
+          # banners.json NO se sube: lo administra el panel y vive solo en el servidor
+          rsync -a --exclude='.git' --exclude='.github' --exclude='node_modules' --exclude='.gitignore' --exclude='*.log' --exclude='banners.json' ./ /tmp/deploy/
           echo "=== Archivos a subir ==="
           find /tmp/deploy -type f | sort
           echo "=== Cantidad: ==="
