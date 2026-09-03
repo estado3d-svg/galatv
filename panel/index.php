@@ -382,7 +382,9 @@ async function loadSettings() {
   const res = await fetch(API + '?action=settings_get');
   const data = await res.json();
   if (!data.success) return;
-  document.getElementById('offLink').value = data.settings.off_link || '';
+  // Si no hay link guardado, mostrar el video por defecto que usa la página
+  const defOff = 'https://www.youtube.com/watch?v=pDrOzULyCpo';
+  document.getElementById('offLink').value = data.settings.off_link || defOff;
   document.getElementById('offLoop').checked = parseInt(data.settings.off_loop) === 1;
 }
 async function saveSettings() {
