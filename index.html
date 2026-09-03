@@ -112,20 +112,8 @@
         </article>
       </div>
 
-      <div class="banners-row">
-        <a href="https://www.quieromientrada.com" target="_blank" rel="noopener noreferrer" class="banner-link banner-link-entrada">
-          <img class="banner-img" src="quiero-mi-entrada.gif" alt="Quiero mi entrada">
-        </a>
-        <a href="https://www.instagram.com/tubarao.congelados?igsi=MW04c2pweHU2bGxsbg%3D%3D" target="_blank" rel="noopener noreferrer" class="banner-link banner-link-tubarao">
-          <img class="banner-img" src="tubarao.gif" alt="Tubarão">
-        </a>
-        <a href="https://www.instagram.com/bell_accesorios_co?igsi=cjFvcTh4b2g4bmhu" target="_blank" rel="noopener noreferrer" class="banner-link banner-link-bellyco">
-          <img class="banner-img" src="bellyco.gif" alt="Bellyco">
-        </a>
-      </div>
-      <div class="banners-row banners-row-gifpromo">
-        <img class="banner-img" src="gif-promo.gif" alt="GalaTV">
-      </div>
+      <div class="banners-row" id="bannersRow1"></div>
+      <div class="banners-row banners-row-gifpromo" id="bannersRow2"></div>
     </section>
     
     <section id="comercial" class="commercial-section">
@@ -462,5 +450,51 @@
   </script>
   
   <script src="script.js"></script>
+
+  <script>
+    // ===== ===== Cargar banners dinámicamente ===== =====
+    async function loadBanners() {
+      try {
+        const res = await fetch('banners.json');
+        const data = await res.json();
+        const banners = data.banners || [];
+
+        const row1 = document.getElementById('bannersRow1');
+        const row2 = document.getElementById('bannersRow2');
+        if (!row1 || !row2) return;
+
+        // Limpiar filas
+        row1.innerHTML = '';
+        row2.innerHTML = '';
+
+        banners.forEach(b => {
+          // Clase por tamaño (333 o 666)
+          const sizeClass = b.width >= 666 ? 'banner-666' : 'banner-333';
+          const img = document.createElement('img');
+          img.className = 'banner-img ' + sizeClass;
+          img.src = b.src;
+          img.alt = b.alt || '';
+
+          const target = b.row === 2 ? row2 : row1;
+
+          if (b.link) {
+            const a = document.createElement('a');
+            a.href = b.link;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.className = 'banner-link';
+            a.appendChild(img);
+            target.appendChild(a);
+          } else {
+            target.appendChild(img);
+          }
+        });
+      } catch (e) {
+        console.error('Error cargando banners:', e);
+      }
+    }
+
+    loadBanners();
+  </script>
 </body>
 </html>

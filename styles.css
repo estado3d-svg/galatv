@@ -117,12 +117,9 @@ button{cursor:pointer}
 .ad-banner-img{width:333px;max-width:100%;height:150px;object-fit:cover;border-radius:6px;cursor:pointer;display:block;border:1px solid #2b2412}
 .banners-row{display:flex;justify-content:center;gap:12px;margin-top:24px;padding:0 36px;flex-wrap:nowrap}
 .banner-link{display:block;text-decoration:none;flex:none}
-.banner-img{width:100%;height:150px;object-fit:contain;border-radius:6px;display:block;border:1px solid #2b2412;transition:transform .2s,box-shadow .2s;background:#050505;flex:none}
+.banner-img{width:333px;height:150px;object-fit:contain;border-radius:6px;display:block;border:1px solid #2b2412;transition:transform .2s,box-shadow .2s;background:#050505;flex:none}
+.banner-img.banner-666{width:666px}
 .banner-link:hover .banner-img{transform:translateY(-2px);box-shadow:0 4px 18px rgba(255,215,0,.3)}
-.banner-link-entrada,.banner-link-entrada .banner-img{width:333px}
-.banner-link-tubarao,.banner-link-tubarao .banner-img{width:333px}
-.banner-link-bellyco,.banner-link-bellyco .banner-img{width:333px}
-.banners-row-gifpromo img[src="gif-promo.gif"]{width:666px}
 .program-card-proximo .thumb{background:#0a0a0a}
 .proximo-box{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#8a7a3a;font-size:12px;font-weight:bold;letter-spacing:2px;border:1px dashed #4a3f14;margin:14px;border-radius:4px}
 .thumb{height:99px;position:relative;overflow:hidden}
@@ -160,11 +157,7 @@ button{cursor:pointer}
   .schedule{padding:0 15px}.schedule-grid{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px}
   .banners-row{width:100%;padding:0 15px;margin-top:12px;display:flex;flex-direction:column;flex-wrap:nowrap;overflow-x:visible;gap:12px}
   .banners-row .banner-link{flex:none;display:block}
-  .banners-row .banner-img{flex:none;height:auto;object-fit:contain;background:#050505}
-  .banners-row .banner-link-entrada,.banners-row .banner-link-entrada .banner-img{width:100%;height:auto}
-  .banners-row .banner-img[src="gif-promo.gif"]{width:100%;height:auto}
-  .banners-row .banner-link-tubarao,.banners-row .banner-link-tubarao .banner-img{width:100%;height:auto}
-  .banners-row .banner-link-bellyco,.banners-row .banner-link-bellyco .banner-img{width:100%;height:auto}
+  .banners-row .banner-img,.banners-row .banner-img.banner-666{flex:none;width:100%!important;height:auto;object-fit:contain;background:#050505}
   .golden-grid,.golden-overlay{display:none!important}
 
 /* Golden light trails/stars overlay */
