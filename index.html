@@ -93,7 +93,11 @@
         <h3 data-i18n="PROGRAMACIÓN SEMANAL">PROGRAMACIÓN SEMANAL</h3>
       </div>
 
-      <div class="schedule-grid" id="programasGrid"></div>
+      <div class="carousel">
+        <button class="car-nav car-prev" id="carPrev" aria-label="Anterior">‹</button>
+        <div class="car-track" id="programasGrid"></div>
+        <button class="car-nav car-next" id="carNext" aria-label="Siguiente">›</button>
+      </div>
 
       <div class="banners-container" id="bannersContainer"></div>
     </section>
@@ -499,6 +503,7 @@
             <div class="thumb"><div class="proximo-box">PRÓXIMAMENTE</div></div>
             <h4>PRÓXIMAMENTE</h4><small>NUEVA SERIE</small>
           </article>`;
+        setupCarousel();
         return;
       }
       pr.forEach(p => {
@@ -512,9 +517,48 @@
         card.innerHTML = `
           ${thumb}
           <h4>${escapeHtml(p.titulo)}</h4><small>${escapeHtml(p.categoria)}</small>
-          <time>${escapeHtml(diasTxt)} ${escapeHtml(p.hora)}</time>`;
+          <time>${escapeHtml(diasTxt)} ${escapeHtml(p.hora)} hs</time>`;
         progGrid.appendChild(card);
       });
+      setupCarousel();
+    }
+
+    // ===== Carrusel de programación =====
+    let carInterval = null;
+    function setupCarousel() {
+      const track = document.getElementById('programasGrid');
+      const prev = document.getElementById('carPrev');
+      const next = document.getElementById('carNext');
+      if (!track) return;
+      const cards = track.querySelectorAll('.program-card');
+      const count = cards.length;
+
+      // Si son 4 o menos, ocultar flechas y no autoavanzar
+      if (count <= 4) {
+        if (prev) prev.classList.add('hidden');
+        if (next) next.classList.add('hidden');
+        if (carInterval) { clearInterval(carInterval); carInterval = null; }
+        return;
+      }
+
+      if (prev) prev.classList.remove('hidden');
+      if (next) next.classList.remove('hidden');
+
+      if (carInterval) clearInterval(carInterval);
+      carInterval = setInterval(() => scrollCarousel(1), 3500);
+    }
+
+    function scrollCarousel(dir) {
+      const track = document.getElementById('programasGrid');
+      if (!track) return;
+      const card = track.querySelector('.program-card');
+      if (!card) return;
+      const step = card.offsetWidth + 12; // ancho card + gap
+      const max = track.scrollWidth - track.clientWidth;
+      let nextPos = track.scrollLeft + dir * step;
+      if (nextPos >= max) nextPos = 0;      // vuelve al inicio
+      if (nextPos < 0) nextPos = max;       // si va antes del inicio, al final
+      track.scrollTo({ left: nextPos, behavior: 'smooth' });
     }
 
     function escapeHtml(s) {
@@ -570,6 +614,12 @@
     }
 
     loadBanners();
+
+    // Flechas del carrusel
+    const carPrev = document.getElementById('carPrev');
+    const carNext = document.getElementById('carNext');
+    if (carPrev) carPrev.addEventListener('click', () => { scrollCarousel(-1); });
+    if (carNext) carNext.addEventListener('click', () => { scrollCarousel(1); });
   </script>
 </body>
 </html>

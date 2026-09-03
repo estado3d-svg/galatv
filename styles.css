@@ -112,8 +112,13 @@ button{cursor:pointer}
 .section-head h3{font-size:16px;font-weight:400;margin:0 0 10px}
 .arrows{display:flex;gap:8px}
 .arrows button{width:32px;height:32px;border-radius:50%;border:1px solid #4a3b14;background:#060606;color:#e5b932;font-size:24px;line-height:1}
-.schedule-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.program-card{min-width:0;background:#070707;border:1px solid #2b2412;border-radius:6px;padding-bottom:7px;overflow:hidden;position:relative;display:flex;flex-direction:column}
+.carousel{position:relative;display:flex;align-items:center;gap:8px}
+.car-track{display:flex;gap:12px;overflow-x:auto;scroll-behavior:smooth;scroll-snap-type:x mandatory;flex:1;padding:4px 2px}
+.car-track::-webkit-scrollbar{display:none}
+.car-nav{flex:none;width:44px;height:44px;border-radius:50%;border:1px solid #4a3b14;background:#060606;color:#e5b932;font-size:28px;line-height:1;cursor:pointer;transition:.2s;z-index:2;user-select:none}
+.car-nav:hover{background:#1a1406;border-color:#FFD700;color:#fff}
+.car-nav.hidden{display:none}
+.program-card{min-width:0;flex:0 0 calc(25% - 9px);background:#070707;border:1px solid #2b2412;border-radius:6px;padding-bottom:7px;overflow:hidden;position:relative;display:flex;flex-direction:column;scroll-snap-align:start}
 .ad-banner-img{width:333px;max-width:100%;height:150px;object-fit:cover;border-radius:6px;cursor:pointer;display:block;border:1px solid #2b2412}
 .banners-container{margin-top:24px}
 .banners-row{display:flex;justify-content:center;gap:12px;padding:0 36px;flex-wrap:nowrap}
@@ -129,9 +134,9 @@ button{cursor:pointer}
 .thumb{aspect-ratio:333/450;position:relative;overflow:hidden;width:100%}
 .thumb img{width:100%;height:100%;object-fit:cover}
 .thumb>span{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.55);border:1px solid #777;display:grid;place-items:center;color:#fff;font-size:14px}
-.program-card h4{font-size:11px;font-weight:500;margin:8px 10px 3px}
-.program-card small{font-size:9px;color:#aaa;margin-left:10px}
-.program-card time{font-size:9px;color:#c5aa48;margin:3px 10px 0}
+.program-card h4{font-size:18px;font-weight:600;margin:10px 12px 4px}
+.program-card small{font-size:13px;color:#aaa;margin-left:12px}
+.program-card time{font-size:13px;color:#c5aa48;margin:5px 12px 0}
 .subscription-panel{max-width:740px;height:170px;position:relative;margin:-186px 36px 15px auto;border:1px solid #7c5b13;border-radius:8px;overflow:hidden;background:#000;z-index:2}
 .schedule{max-width:1510px;margin:15px auto 0;padding:0 36px 20px;position:relative;z-index:2}
 .commercial-section{max-width:1400px;margin:40px auto 0;padding:60px 36px;background:linear-gradient(180deg,rgba(255,215,0,0.03) 0%,transparent 100%);border-radius:10px;border:1px solid #2c2410;position:relative;z-index:2}
@@ -208,5 +213,5 @@ button{cursor:pointer}
 @keyframes goldenTrail{from{transform:rotate(0deg) translate(0,0)}to{transform:rotate(360deg) translate(-25%, -25%)}}
 @keyframes goldenTrail2{from{transform:rotate(180deg) translate(0,0)}to{transform:rotate(540deg) translate(25%, 25%)}}
 @keyframes goldenSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-  .program-card{min-width:260px;scroll-snap-align:start}.subscription-panel{margin:5px 15px 20px;height:165px}
+  .program-card{flex:0 0 calc(50% - 6px)}.subscription-panel{margin:5px 15px 20px;height:165px}
 }
