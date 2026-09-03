@@ -56,6 +56,7 @@ $email = $_SESSION['email'] ?? '';
   .checkbox-row{display:flex;align-items:center;gap:8px;margin-top:10px}
   .checkbox-row input{width:18px;height:18px}
   .programa{display:flex;align-items:center;gap:12px;background:#0a0a0a;border:1px solid #2b2412;border-radius:6px;padding:12px;margin-bottom:10px}
+  .programa img{width:166px;height:225px;object-fit:contain;background:#000;border-radius:4px;border:1px solid #333}
   .programa .info{flex:1;min-width:0}
   .programa .info input{width:100%;background:#111;border:1px solid #2c2410;color:#ddd;padding:7px 10px;border-radius:4px;font-size:13px;margin-bottom:6px}
   .programa .info .pf{display:flex;gap:8px}
@@ -181,11 +182,15 @@ const API = 'api.php';
 let pendingFile = null;
 let currentBanners = [];
 
-function showMsg(text) {
+function showMsg(text, type) {
   const m = document.getElementById('msg');
   m.textContent = text;
   m.style.display = 'block';
-  setTimeout(() => m.style.display = 'none', 3000);
+  m.style.background = type === 'error' ? '#2a0d0d' : '#0d2a14';
+  m.style.borderColor = type === 'error' ? '#8a1d1d' : '#1d8a3a';
+  m.style.color = type === 'error' ? '#ffd7d7' : '#b7f7c8';
+  clearTimeout(m._t);
+  m._t = setTimeout(() => m.style.display = 'none', 3500);
 }
 
 async function loadBanners() {
@@ -483,7 +488,7 @@ loadBanners();
       fd.append('hora', buildHora(g('hh'), g('mm')));
       const res = await fetch(API, { method: 'POST', body: fd });
       const data = await res.json();
-      showMsg(data.success ? 'Programa guardado ✓' : (data.error || 'Error'));
+      showMsg(data.success ? 'Programa guardado ✓' : (data.error || 'Error al guardar'), data.success ? 'ok' : 'error');
       loadProgramas();
     }
 
