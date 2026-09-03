@@ -42,17 +42,30 @@ if ($httpCode !== 200) {
 }
 
 $tokenData = json_decode($response, true);
-if (!isset($tokenData['id_token'])) {
+$idToken = $tokenData['id_token'] ?? null;
+if (!$idToken) {
     die('No se recibió el id_token.');
 }
 
-// Decodificar el id_token (parte del medio es el payload, base64url)
-$parts = explode('.', $tokenData['id_token']);
-$payload = json_decode(base64_decode(strtr($parts[1], '-_', '+/')), true);
+// VERIFICAR el id_token contra la API de Google (valida firma y audiencia).
+// NO decodificar manualmente: así evitamos tokens forjados.
+$verifyUrl = 'https://oauth2.googleapis.com/tokeninfo?id_token=' . urlencode($idToken);
+$vch = curl_init($verifyUrl);
+curl_setopt($vch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($vch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($vch, CURLOPT_TIMEOUT, 20);
+$verifyRes = curl_exec($vch);
+curl_close($vch);
+$info = json_decode($verifyRes, true);
 
-$googleEmail = $payload['email'] ?? '';
-$googleName  = $payload['name'] ?? '';
-$googleSub   = $payload['sub'] ?? '';
+// Validar que la audiencia sea nuestro client_id
+if (empty($info['aud']) || $info['aud'] !== GOOGLE_CLIENT_ID) {
+    die('Token de Google inválido (audiencia no coincide).');
+}
+
+$googleEmail = $info['email'] ?? '';
+$googleName  = $info['name'] ?? '';
+$googleSub   = $info['sub'] ?? '';
 
 // Validar que el email esté permitido
 if (!in_array(strtolower($googleEmail), array_map('strtolower', $ALLOWED_USERS))) {
@@ -60,6 +73,7 @@ if (!in_array(strtolower($googleEmail), array_map('strtolower', $ALLOWED_USERS))
 }
 
 // Login exitoso
+session_regenerate_id(true);   // evita session fixation
 $_SESSION['logged_in']  = true;
 $_SESSION['email']      = $googleEmail;
 $_SESSION['name']       = $googleName;
