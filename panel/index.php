@@ -145,7 +145,7 @@ $email = $_SESSION['email'] ?? '';
           <div style="display:flex;gap:10px;width:100%;flex-wrap:wrap;align-items:flex-end">
             <input type="text" id="npTitulo" placeholder="Título (ej: EL HEREDERO)" style="flex:1;min-width:150px">
             <input type="text" id="npCategoria" placeholder="Categoría (ej: DRAMA)" style="flex:1;min-width:120px">
-            <input type="number" id="npHh" min="0" max="23" placeholder="HH" style="flex:0 0 64px;background:#111;border:1px solid #2c2410;color:#ddd;padding:9px 10px;border-radius:4px;font-size:13px" title="Hora (0-23)">
+            <input type="number" id="npHh" min="0" max="23" value="20" style="flex:0 0 64px;background:#111;border:1px solid #2c2410;color:#ddd;padding:9px 10px;border-radius:4px;font-size:13px" title="Hora (0-23)">
             <span style="color:#888;font-size:16px">:</span>
             <input type="number" id="npMm" min="0" max="59" placeholder="MM" value="00" style="flex:0 0 64px;background:#111;border:1px solid #2c2410;color:#ddd;padding:9px 10px;border-radius:4px;font-size:13px" title="Minutos">
             <div style="display:flex;flex-direction:column">
