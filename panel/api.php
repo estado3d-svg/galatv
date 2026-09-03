@@ -1,11 +1,17 @@
 <?php
 // Panel API - Manejo de anuncios y programas
-session_start();
 require_once __DIR__ . '/config.php';
 if (file_exists(__DIR__ . '/config.local.php')) require_once __DIR__ . '/config.local.php';
 require_once __DIR__ . '/db.php';
 
 if (empty($_SESSION['logged_in'])) {
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'error' => 'No autorizado']);
+    exit;
+}
+// Normalizar lista permitida (soporta constante o variable según versión)
+$allowed = defined('ALLOWED_USERS') ? ALLOWED_USERS : (isset($ALLOWED_USERS) ? $ALLOWED_USERS : []);
+if (!in_array($_SESSION['email'], $allowed)) {
     header('Content-Type: application/json');
     echo json_encode(['success' => false, 'error' => 'No autorizado']);
     exit;
