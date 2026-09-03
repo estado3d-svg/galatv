@@ -158,9 +158,9 @@ switch ($action) {
         $imgUrl = 'panel/img_prog';
         if (!is_dir($imgDir)) @mkdir($imgDir, 0775, true);
 
-        // Redimensionar a 333x500 px
+        // Redimensionar a 333x450 px
         $targetW = 333;
-        $targetH = 500;
+        $targetH = 450;
 
         $src = $_FILES['file']['tmp_name'];
         $srcImg = null;
