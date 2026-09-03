@@ -456,7 +456,7 @@
     // ===== ===== Cargar banners dinámicamente ===== =====
     async function loadBanners() {
       try {
-        const res = await fetch('banners.json');
+        const res = await fetch('banners_api.php');
         const data = await res.json();
         const banners = data.banners || [];
 

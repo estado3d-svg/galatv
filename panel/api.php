@@ -1,6 +1,8 @@
 <?php
 session_start();
 require_once __DIR__ . '/config.php';
+if (file_exists(__DIR__ . '/config.local.php')) require_once __DIR__ . '/config.local.php';
+require_once __DIR__ . '/db.php';
 
 // Requiere login
 if (empty($_SESSION['logged_in'])) {
@@ -11,81 +13,55 @@ if (empty($_SESSION['logged_in'])) {
 
 header('Content-Type: application/json; charset=UTF-8');
 
-// Leer banners actuales
-function loadBanners() {
-    $file = BANNERS_FILE;
-    if (!file_exists($file)) return ['banners' => []];
-    $data = json_decode(file_get_contents($file), true);
-    return is_array($data) ? $data : ['banners' => []];
-}
-
-function saveBanners($banners) {
-    $file = BANNERS_FILE;
-    $json = json_encode(['banners' => $banners], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-    if ($json === false) {
-        @file_put_contents(__DIR__ . '/debug.log', date('c') . ' json_encode_fail: ' . json_last_error_msg() . "\n", FILE_APPEND);
-        return false;
-    }
-    $r = file_put_contents($file, $json);
-    if ($r === false) {
-        @file_put_contents(__DIR__ . '/debug.log', date('c') . ' write_fail: ' . $file . "\n", FILE_APPEND);
-    }
-    return $r !== false;
-}
-
+$pdo = db();
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
-$banners = loadBanners()['banners'];
-$lastId = 0;
-foreach ($banners as $b) { if (isset($b['id']) && is_numeric($b['id']) && $b['id'] > $lastId) $lastId = (int)$b['id']; }
+
+function fetchAllBanners($pdo) {
+    return $pdo->query('SELECT * FROM banners ORDER BY position ASC, id ASC')->fetchAll();
+}
 
 switch ($action) {
 
     // LISTAR banners
     case 'list':
-        echo json_encode(['success' => true, 'banners' => $banners], JSON_UNESCAPED_UNICODE);
+        echo json_encode(['success' => true, 'banners' => fetchAllBanners($pdo)], JSON_UNESCAPED_UNICODE);
         break;
 
     // EDITAR link de un banner
     case 'update_link':
-        $id = $_POST['id'] ?? '';
+        $id = (int)($_POST['id'] ?? 0);
         $link = trim($_POST['link'] ?? '');
-        foreach ($banners as &$b) {
-            if ((string)$b['id'] === (string)$id) {
-                $b['link'] = $link;
-            }
-        }
-        unset($b);
-        echo json_encode(['success' => saveBanners($banners)]);
+        $st = $pdo->prepare('UPDATE banners SET link = ? WHERE id = ?');
+        $st->execute([$link, $id]);
+        echo json_encode(['success' => true]);
         break;
 
     // EDITAR cuerpos (1-3) de un banner
     case 'update_bodies':
-        $id = $_POST['id'] ?? '';
+        $id = (int)($_POST['id'] ?? 0);
         $bodies = max(1, min(3, (int)($_POST['bodies'] ?? 1)));
-        foreach ($banners as &$b) {
-            if ((string)$b['id'] === (string)$id) {
-                $b['bodies'] = $bodies;
-            }
-        }
-        unset($b);
-        echo json_encode(['success' => saveBanners($banners)]);
+        $st = $pdo->prepare('UPDATE banners SET bodies = ? WHERE id = ?');
+        $st->execute([$bodies, $id]);
+        echo json_encode(['success' => true]);
         break;
 
     // CAMBIAR imagen (subir reemplazo) de un banner existente
     case 'update_image':
-        $id = $_POST['id'] ?? '';
+        $id = (int)($_POST['id'] ?? 0);
         if (empty($_FILES['file']['name'])) { echo json_encode(['success' => false, 'error' => 'No se recibió archivo']); exit; }
         $ext = strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION));
         if (!in_array($ext, ['gif','png','jpg','jpeg'])) { echo json_encode(['success' => false, 'error' => 'Formato no permitido. Usá GIF, PNG o JPG.']); exit; }
-        $targetDir = SITE_ROOT . '/';
         $filename = 'banner-' . $id . '-' . time() . '.' . $ext;
-        $dest = $targetDir . $filename;
+        $dest = SITE_ROOT . '/' . $filename;
         if (!move_uploaded_file($_FILES['file']['tmp_name'], $dest)) { echo json_encode(['success' => false, 'error' => 'No se pudo guardar el archivo']); exit; }
-        foreach ($banners as &$b) {
-            if ((string)$b['id'] === (string)$id) { $b['src'] = $filename; }
-        }
-        unset($b);
-        echo json_encode(['success' => saveBanners($banners)]);
+        // borrar imagen anterior si es propia del panel
+        $prev = $pdo->prepare('SELECT src FROM banners WHERE id = ?');
+        $prev->execute([$id]);
+        $oldSrc = $prev->fetchColumn();
+        if ($oldSrc && strpos($oldSrc, 'banner-') === 0 && file_exists(SITE_ROOT . '/' . $oldSrc)) @unlink(SITE_ROOT . '/' . $oldSrc);
+        $st = $pdo->prepare('UPDATE banners SET src = ? WHERE id = ?');
+        $st->execute([$filename, $id]);
+        echo json_encode(['success' => true]);
         break;
 
     // AGREGAR nuevo banner (subir GIF, opcional link, 1-3 cuerpos)
@@ -96,48 +72,37 @@ switch ($action) {
         if (empty($_FILES['file']['name'])) { echo json_encode(['success' => false, 'error' => 'Subí un archivo']); exit; }
         $ext = strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION));
         if (!in_array($ext, ['gif','png','jpg','jpeg'])) { echo json_encode(['success' => false, 'error' => 'Formato no permitido. Usá GIF, PNG o JPG.']); exit; }
-        $filename = 'banner-' . ($lastId+1) . '-' . time() . '.' . $ext;
+        $filename = 'banner-' . time() . '.' . $ext;
         $dest = SITE_ROOT . '/' . $filename;
         if (!move_uploaded_file($_FILES['file']['tmp_name'], $dest)) { echo json_encode(['success' => false, 'error' => 'No se pudo guardar el archivo']); exit; }
-        $newId = $lastId + 1;
-        $banners[] = array(
-            'id' => $newId,
-            'src' => $filename,
-            'link' => $link,
-            'bodies' => $bodies,
-            'alt' => $alt
-        );
-        echo json_encode(['success' => saveBanners($banners)]);
+        $maxPos = (int)$pdo->query('SELECT COALESCE(MAX(position),0) FROM banners')->fetchColumn();
+        $st = $pdo->prepare('INSERT INTO banners (src, link, bodies, alt, position) VALUES (?,?,?,?,?)');
+        $st->execute([$filename, $link, $bodies, $alt, $maxPos + 1]);
+        echo json_encode(['success' => true]);
         break;
 
     // BORRAR banner
     case 'delete':
-        $id = $_POST['id'] ?? '';
-        $newBanners = array();
-        foreach ($banners as $b) {
-            if ((string)$b['id'] === (string)$id) {
-                // borrar archivo si es propio (no los gif-promo/tubarao originales)
-                $f = SITE_ROOT . '/' . $b['src'];
-                if (file_exists($f) && strpos($b['src'], 'banner-') === 0) @unlink($f);
-            } else {
-                $newBanners[] = $b;
-            }
-        }
-        echo json_encode(['success' => saveBanners($newBanners)]);
+        $id = (int)($_POST['id'] ?? 0);
+        $prev = $pdo->prepare('SELECT src FROM banners WHERE id = ?');
+        $prev->execute([$id]);
+        $oldSrc = $prev->fetchColumn();
+        if ($oldSrc && strpos($oldSrc, 'banner-') === 0 && file_exists(SITE_ROOT . '/' . $oldSrc)) @unlink(SITE_ROOT . '/' . $oldSrc);
+        $st = $pdo->prepare('DELETE FROM banners WHERE id = ?');
+        $st->execute([$id]);
+        echo json_encode(['success' => true]);
         break;
 
-    // ORDENAR banners (reordenar la fila 1)
+    // ORDENAR banners
     case 'reorder':
         $order = json_decode($_POST['order'] ?? '[]', true);
         if (!is_array($order)) { echo json_encode(['success' => false, 'error' => 'Orden inválido']); exit; }
-        $byId = array();
-        foreach ($banners as $b) $byId[(string)$b['id']] = $b;
-        $newBanners = array();
+        $st = $pdo->prepare('UPDATE banners SET position = ? WHERE id = ?');
+        $pos = 1;
         foreach ($order as $id) {
-            if (isset($byId[(string)$id])) { $newBanners[] = $byId[(string)$id]; unset($byId[(string)$id]); }
+            $st->execute([$pos++, (int)$id]);
         }
-        foreach ($byId as $b) $newBanners[] = $b;
-        echo json_encode(['success' => saveBanners($newBanners)]);
+        echo json_encode(['success' => true]);
         break;
 
     default:
