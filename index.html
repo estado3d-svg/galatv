@@ -533,6 +533,7 @@
       if (!track) return;
       const cards = track.querySelectorAll('.program-card');
       const count = cards.length;
+      carIdx = 0;
 
       // Leer config del carrusel desde la BD
       const s = window.__settings || {};
@@ -559,6 +560,7 @@
       }
     }
 
+    let carIdx = 0;
     function scrollCarousel(dir) {
       const track = document.getElementById('programasGrid');
       if (!track) return;
@@ -568,14 +570,12 @@
       const cardW = card.offsetWidth + gap;
       const visible = Math.max(1, Math.floor(track.clientWidth / cardW));
       const total = track.querySelectorAll('.program-card').length;
-      const maxIndex = Math.max(0, total - visible); // índice máximo de scroll
+      const maxIndex = Math.max(0, total - visible);
 
-      // índice actual basado en scrollLeft
-      let idx = Math.round(track.scrollLeft / cardW);
-      idx += dir;
-      if (idx > maxIndex) idx = 0;          // pasa del último → vuelve al inicio
-      if (idx < 0) idx = maxIndex;          // del inicio hacia atrás → al final
-      const nextPos = idx * cardW;
+      carIdx += dir;
+      if (carIdx > maxIndex) carIdx = 0;     // pasó el último → vuelve al inicio
+      if (carIdx < 0) carIdx = maxIndex;     // antes del inicio → al final
+      const nextPos = carIdx * cardW;
       track.scrollTo({ left: nextPos, behavior: 'smooth' });
     }
 
