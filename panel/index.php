@@ -102,6 +102,7 @@ $email = $_SESSION['email'] ?? '';
 <?php if ($logged): ?>
 const API = 'api.php';
 let pendingFile = null;
+let currentBanners = [];
 
 function showMsg(text) {
   const m = document.getElementById('msg');
@@ -114,7 +115,27 @@ async function loadBanners() {
   const res = await fetch(API + '?action=list');
   const data = await res.json();
   if (!data.success) return;
+  currentBanners = data.banners;
   render(data.banners);
+}
+
+// Reordenar banner (dir: -1 subir, +1 bajar) en el array global
+async function moveBanner(id, dir) {
+  const idx = currentBanners.findIndex(b => String(b.id) === String(id));
+  if (idx < 0) return;
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= currentBanners.length) return;
+  // intercambiar posiciones
+  [currentBanners[idx], currentBanners[newIdx]] = [currentBanners[newIdx], currentBanners[idx]];
+  render(currentBanners);
+  // persistir el nuevo orden
+  const order = currentBanners.map(b => String(b.id));
+  const fd = new FormData();
+  fd.append('action', 'reorder');
+  fd.append('order', JSON.stringify(order));
+  const res = await fetch(API, { method: 'POST', body: fd });
+  const data = await res.json();
+  if (!data.success) { showMsg('No se pudo guardar el orden'); loadBanners(); }
 }
 
 function render(banners) {
@@ -142,6 +163,8 @@ function render(banners) {
           <input data-id="${b.id}" data-field="link" value="${b.link || ''}">
         </div>
         <div class="actions">
+          <button class="btn btn-sm" title="Subir" onclick="moveBanner('${b.id}',-1)">▲</button>
+          <button class="btn btn-sm" title="Bajar" onclick="moveBanner('${b.id}',1)">▼</button>
           <button class="btn btn-sm" onclick="saveChanges('${b.id}')">Guardar</button>
           <button class="btn btn-ghost btn-sm" onclick="changeImage('${b.id}')">Cambiar imagen</button>
           <button class="btn btn-danger btn-sm" onclick="del('${b.id}')">Eliminar</button>

@@ -473,12 +473,11 @@
     function units(b) { return Math.max(1, Math.min(3, parseInt(b.bodies || 1, 10) || 1)); }
 
     function groupBannersIntoRows(banners) {
-      // Ordenar: los de más cuerpos primero para no dejar huecos
-      const sorted = [...banners].sort((a, b) => units(b) - units(a));
+      // Respeta el orden del array (que se configura en el panel)
       const rows = [];
       let current = [];
       let acc = 0;
-      for (const b of sorted) {
+      for (const b of banners) {
         const u = units(b);
         if (acc + u <= 3) {
           current.push(b);
