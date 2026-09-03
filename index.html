@@ -470,10 +470,10 @@
       }
     }
 
-    function units(b) { return (b.row === 2 || b.width >= 666) ? 2 : 1; }
+    function units(b) { return Math.max(1, Math.min(3, parseInt(b.bodies || 1, 10) || 1)); }
 
     function groupBannersIntoRows(banners) {
-      // Ordenar: los grandes primero para no dejar huecos (greedy)
+      // Ordenar: los de más cuerpos primero para no dejar huecos
       const sorted = [...banners].sort((a, b) => units(b) - units(a));
       const rows = [];
       let current = [];
@@ -497,7 +497,8 @@
       const row = document.createElement('div');
       row.className = 'banners-row';
       banners.forEach(b => {
-        const sizeClass = b.width >= 666 ? 'banner-666' : 'banner-333';
+        const bodies = units(b);
+        const sizeClass = 'banner-' + bodies;
         const img = document.createElement('img');
         img.className = 'banner-img ' + sizeClass;
         img.src = b.src;

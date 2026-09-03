@@ -4,34 +4,29 @@
       "id": "entrada",
       "src": "quiero-mi-entrada.gif",
       "link": "https://www.quieromientrada.com",
-      "width": 333,
-      "height": 150,
+      "bodies": 1,
       "alt": "Quiero mi entrada"
     },
     {
       "id": "tubarao",
       "src": "tubarao.gif",
       "link": "https://www.instagram.com/tubarao.congelados?igsi=MW04c2pweHU2bGxsbg%3D%3D",
-      "width": 333,
-      "height": 150,
+      "bodies": 1,
       "alt": "Tubarão"
     },
     {
       "id": "bellyco",
       "src": "bellyco.gif",
       "link": "https://www.instagram.com/bell_accesorios_co?igsi=cjFvcTh4b2g4bmhu",
-      "width": 333,
-      "height": 150,
+      "bodies": 1,
       "alt": "Bellyco"
     },
     {
       "id": "gif-promo",
       "src": "gif-promo.gif",
       "link": "",
-      "width": 666,
-      "height": 150,
-      "alt": "GalaTV",
-      "row": 2
+      "bodies": 2,
+      "alt": "GalaTV"
     }
   ]
 }

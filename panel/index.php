@@ -77,9 +77,14 @@ $email = $_SESSION['email'] ?? '';
 
     <div class="card">
       <h2 style="font-size:17px;margin-bottom:15px">Agregar nuevo banner</h2>
-      <div class="drop" id="drop">📥 Arrastrá un GIF/PNG aquí, o clickeá para elegir<br><small style="color:#666">Se subirá a 333×150px</small></div>
+      <div class="drop" id="drop">📥 Arrastrá un GIF/PNG aquí, o clickeá para elegir<br><small style="color:#666">1 cuerpo = 333px · 2 cuerpos = 666px · 3 cuerpos = 999px</small></div>
       <input type="file" id="newFile" accept=".gif,.png,.jpg,.jpeg" style="display:none">
       <form id="addForm" class="row" style="margin-top:10px">
+        <select id="newBodies" style="background:#111;border:1px solid #2c2410;color:#ddd;padding:9px 12px;border-radius:4px;font-size:13px">
+          <option value="1">1 cuerpo (333px)</option>
+          <option value="2">2 cuerpos (666px)</option>
+          <option value="3">3 cuerpos (999px)</option>
+        </select>
         <input type="text" id="newLink" placeholder="Link (opcional, ej: https://...)">
         <input type="text" id="newAlt" placeholder="Texto alternativo" value="Banner">
         <button type="submit" class="btn">Subir banner</button>
@@ -115,10 +120,10 @@ async function loadBanners() {
 function render(banners) {
   const list = document.getElementById('list');
   list.innerHTML = '';
-  const row1 = banners.filter(b => (b.row || 1) === 1);
-  const row2 = banners.filter(b => b.row === 2);
+  const bodies = b => Math.max(1, Math.min(3, parseInt(b.bodies || 1, 10) || 1));
 
   const section = (title, arr) => {
+    if (!arr.length) return;
     const box = document.createElement('div');
     box.innerHTML = `<div style="font-size:13px;color:#FFD700;margin:12px 0 8px">${title}</div>`;
     arr.forEach(b => {
@@ -127,11 +132,17 @@ function render(banners) {
       el.innerHTML = `
         <img src="../${b.src}" alt="">
         <div class="info">
+          <label style="margin-top:6px">Cuerpos (1=333px, 2=666px, 3=999px)</label>
+          <select data-id="${b.id}" data-field="bodies" style="width:100%;background:#111;border:1px solid #2c2410;color:#ddd;padding:7px 10px;border-radius:4px;margin-bottom:8px">
+            <option value="1" ${bodies(b)===1?'selected':''}>1 cuerpo (333px)</option>
+            <option value="2" ${bodies(b)===2?'selected':''}>2 cuerpos (666px)</option>
+            <option value="3" ${bodies(b)===3?'selected':''}>3 cuerpos (999px)</option>
+          </select>
           <label>Link (dejá vacío para que sea solo imagen)</label>
           <input data-id="${b.id}" data-field="link" value="${b.link || ''}">
         </div>
         <div class="actions">
-          <button class="btn btn-sm" onclick="saveLink('${b.id}')">Guardar link</button>
+          <button class="btn btn-sm" onclick="saveChanges('${b.id}')">Guardar</button>
           <button class="btn btn-ghost btn-sm" onclick="changeImage('${b.id}')">Cambiar imagen</button>
           <button class="btn btn-danger btn-sm" onclick="del('${b.id}')">Eliminar</button>
         </div>`;
@@ -140,12 +151,35 @@ function render(banners) {
     list.appendChild(box);
   };
 
-  section('Fila 1 (banners de 333px)', row1);
-  section('Fila 2 (banner grande 666px)', row2);
-  attachLinkListeners();
+  const one = banners.filter(b => bodies(b) === 1);
+  const two = banners.filter(b => bodies(b) === 2);
+  const three = banners.filter(b => bodies(b) === 3);
+
+  section('Banners de 1 cuerpo (333px)', one);
+  section('Banners de 2 cuerpos (666px)', two);
+  section('Banners de 3 cuerpos (999px)', three);
 }
 
-function attachLinkListeners() {
+async function saveChanges(id) {
+  const linkInput = document.querySelector(`input[data-id="${id}"][data-field="link"]`);
+  const bodiesSel = document.querySelector(`select[data-id="${id}"][data-field="bodies"]`);
+  const link = linkInput.value.trim();
+  const bodies = bodiesSel.value;
+
+  let fd = new FormData();
+  fd.append('action', 'update_link');
+  fd.append('id', id);
+  fd.append('link', link);
+  await fetch(API, { method: 'POST', body: fd });
+
+  fd = new FormData();
+  fd.append('action', 'update_bodies');
+  fd.append('id', id);
+  fd.append('bodies', bodies);
+  const res = await fetch(API, { method: 'POST', body: fd });
+  const data = await res.json();
+  showMsg(data.success ? 'Guardado ✓' : 'Error al guardar');
+  loadBanners();
 }
 
 async function saveLink(id) {
@@ -242,6 +276,7 @@ document.getElementById('addForm').addEventListener('submit', (e) => {
   const fd = new FormData();
   fd.append('action', 'add');
   fd.append('file', pendingFile);
+  fd.append('bodies', document.getElementById('newBodies').value);
   fd.append('link', document.getElementById('newLink').value.trim());
   fd.append('alt', document.getElementById('newAlt').value.trim() || 'Banner');
   uploadWithProgress(fd, data => {

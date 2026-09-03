@@ -58,6 +58,19 @@ switch ($action) {
         echo json_encode(['success' => saveBanners($banners)]);
         break;
 
+    // EDITAR cuerpos (1-3) de un banner
+    case 'update_bodies':
+        $id = $_POST['id'] ?? '';
+        $bodies = max(1, min(3, (int)($_POST['bodies'] ?? 1)));
+        foreach ($banners as &$b) {
+            if ((string)$b['id'] === (string)$id) {
+                $b['bodies'] = $bodies;
+            }
+        }
+        unset($b);
+        echo json_encode(['success' => saveBanners($banners)]);
+        break;
+
     // CAMBIAR imagen (subir reemplazo) de un banner existente
     case 'update_image':
         $id = $_POST['id'] ?? '';
@@ -69,16 +82,17 @@ switch ($action) {
         $dest = $targetDir . $filename;
         if (!move_uploaded_file($_FILES['file']['tmp_name'], $dest)) { echo json_encode(['success' => false, 'error' => 'No se pudo guardar el archivo']); exit; }
         foreach ($banners as &$b) {
-            if ((string)$b['id'] === (string)$id) { $b['src'] = $filename; $b['width'] = 333; $b['height'] = 150; }
+            if ((string)$b['id'] === (string)$id) { $b['src'] = $filename; }
         }
         unset($b);
         echo json_encode(['success' => saveBanners($banners)]);
         break;
 
-    // AGREGAR nuevo banner (subir GIF, opcional link)
+    // AGREGAR nuevo banner (subir GIF, opcional link, 1-3 cuerpos)
     case 'add':
         $link = trim($_POST['link'] ?? '');
         $alt = trim($_POST['alt'] ?? 'Banner');
+        $bodies = max(1, min(3, (int)($_POST['bodies'] ?? 1)));
         if (empty($_FILES['file']['name'])) { echo json_encode(['success' => false, 'error' => 'Subí un archivo']); exit; }
         $ext = strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION));
         if (!in_array($ext, ['gif','png','jpg','jpeg'])) { echo json_encode(['success' => false, 'error' => 'Formato no permitido. Usá GIF, PNG o JPG.']); exit; }
@@ -90,8 +104,7 @@ switch ($action) {
             'id' => $newId,
             'src' => $filename,
             'link' => $link,
-            'width' => 333,
-            'height' => 150,
+            'bodies' => $bodies,
             'alt' => $alt
         );
         echo json_encode(['success' => saveBanners($banners)]);
