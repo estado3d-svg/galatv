@@ -118,7 +118,7 @@ button{cursor:pointer}
 .car-nav{flex:none;width:44px;height:44px;border-radius:50%;border:1px solid #4a3b14;background:#060606;color:#e5b932;font-size:28px;line-height:1;cursor:pointer;transition:.2s;z-index:2;user-select:none}
 .car-nav:hover{background:#1a1406;border-color:#FFD700;color:#fff}
 .car-nav.hidden{display:none}
-.program-card{min-width:0;flex:0 0 calc(25% - 9px);background:#070707;border:1px solid #2b2412;border-radius:6px;padding-bottom:7px;overflow:hidden;position:relative;display:flex;flex-direction:column;scroll-snap-align:start}
+.program-card{min-width:0;flex:0 0 calc(25% - 9px);background:#0b0b0b;border:1px solid #2b2412;border-radius:16px;padding-bottom:7px;overflow:hidden;position:relative;display:flex;flex-direction:column;scroll-snap-align:start}
 .ad-banner-img{width:333px;max-width:100%;height:150px;object-fit:cover;border-radius:6px;cursor:pointer;display:block;border:1px solid #2b2412}
 .banners-container{margin-top:24px}
 .banners-row{display:flex;justify-content:center;gap:12px;padding:0 36px;flex-wrap:nowrap}
