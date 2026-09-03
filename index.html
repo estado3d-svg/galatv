@@ -564,11 +564,18 @@
       if (!track) return;
       const card = track.querySelector('.program-card');
       if (!card) return;
-      const step = card.offsetWidth + 12; // ancho card + gap
-      const max = track.scrollWidth - track.clientWidth;
-      let nextPos = track.scrollLeft + dir * step;
-      if (nextPos >= max) nextPos = 0;      // vuelve al inicio
-      if (nextPos < 0) nextPos = max;       // si va antes del inicio, al final
+      const gap = 12;
+      const cardW = card.offsetWidth + gap;
+      const visible = Math.max(1, Math.floor(track.clientWidth / cardW));
+      const total = track.querySelectorAll('.program-card').length;
+      const maxIndex = Math.max(0, total - visible); // índice máximo de scroll
+
+      // índice actual basado en scrollLeft
+      let idx = Math.round(track.scrollLeft / cardW);
+      idx += dir;
+      if (idx > maxIndex) idx = 0;          // pasa del último → vuelve al inicio
+      if (idx < 0) idx = maxIndex;          // del inicio hacia atrás → al final
+      const nextPos = idx * cardW;
       track.scrollTo({ left: nextPos, behavior: 'smooth' });
     }
 
