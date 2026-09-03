@@ -71,8 +71,8 @@
 
       <div class="player-wrap">
         <div class="live-tag" id="liveTag">OFFLINE</div>
-        <img class="hero-image" src="base.png" alt="Transmisión en vivo" id="heroImage">
-        <iframe class="hero-video" id="heroVideo" src="https://www.youtube.com/embed/live_stream?channel=UCNbKWLI2_ivAZIAQQ5ot6Ng&autoplay=1&mute=1" title="Transmisión en vivo GalaTV" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="display:none"></iframe>
+        <iframe class="hero-video" id="heroVideo" src="https://www.youtube.com/embed/live_stream?channel=UCNbKWLI2_ivAZIAQQ5ot6Ng&autoplay=1&mute=1" title="Transmisión en vivo GalaTV" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        <iframe class="hero-video" id="heroVideoOffline" src="https://www.youtube.com/embed/pDrOzULyCpo?autoplay=1&mute=1&rel=0" title="GalaTV" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="display:none"></iframe>
       </div>
 
       <aside class="features">
@@ -353,36 +353,38 @@
 
     async function fetchLiveViewers() {
       const liveTag = document.querySelector('.live-tag');
-      const heroImage = document.getElementById('heroImage');
-      const heroVideo = document.getElementById('heroVideo');
+      const heroVideo = document.getElementById('heroVideo');       // video en vivo
+      const heroVideoOffline = document.getElementById('heroVideoOffline'); // video offline
       try {
         // Buscar el video en vivo actual del canal (1 sola consulta, menos cuota)
         const sRes = await fetch(`https://www.googleapis.com/youtube/v3/search?part=id&channelId=${YOUTUBE_CHANNEL_ID}&eventType=live&type=video&key=${YOUTUBE_API_KEY}`);
 
-        // Si la API devuelve error (429, 403, etc) NO sabemos -> dejamos imagen + OFFLINE (estado de inicio)
+        function showLive() {
+          if (heroVideo) heroVideo.style.display = 'block';
+          if (heroVideoOffline) heroVideoOffline.style.display = 'none';
+          if (liveTag) { liveTag.classList.remove('off'); liveTag.textContent = 'EN VIVO'; }
+        }
+        function showOffline() {
+          if (heroVideo) heroVideo.style.display = 'none';
+          if (heroVideoOffline) heroVideoOffline.style.display = 'block';
+          if (liveTag) { liveTag.classList.add('off'); liveTag.textContent = 'OFFLINE'; }
+        }
+
+        // Si la API devuelve error (429, 403, etc) NO sabemos -> dejamos el estado OFFLINE (video de respaldo)
         if (sRes.ok) {
           const sData = await sRes.json();
           const liveVideoId = sData?.items?.[0]?.id?.videoId;
           if (liveVideoId) {
-            // HAY live: mostrar video, ocultar imagen, etiqueta EN VIVO
-            if (heroImage) heroImage.style.display = 'none';
-            if (heroVideo) heroVideo.style.display = 'block';
-            if (liveTag) { liveTag.classList.remove('off'); liveTag.textContent = 'EN VIVO'; }
+            showLive();
           } else {
-            // NO hay live: mostrar imagen, ocultar video, etiqueta OFFLINE
-            if (heroImage) heroImage.style.display = 'block';
-            if (heroVideo) heroVideo.style.display = 'none';
-            if (liveTag) { liveTag.classList.add('off'); liveTag.textContent = 'OFFLINE'; }
+            showOffline();
           }
         } else {
-          // Error de API: no sabemos -> dejamos imagen + OFFLINE (estado de inicio)
-          if (heroImage) heroImage.style.display = 'block';
-          if (heroVideo) heroVideo.style.display = 'none';
-          if (liveTag) { liveTag.classList.add('off'); liveTag.textContent = 'OFFLINE'; }
+          showOffline();
         }
       } catch (err) {
-        // Fallo de red: no sabemos -> dejamos imagen + OFFLINE
-        if (heroImage) heroImage.style.display = 'block';
+        // Fallo de red: no sabemos -> dejamos OFFLINE (video de respaldo)
+        if (heroVideoOffline) heroVideoOffline.style.display = 'block';
         if (heroVideo) heroVideo.style.display = 'none';
         if (liveTag) { liveTag.classList.add('off'); liveTag.textContent = 'OFFLINE'; }
       }
