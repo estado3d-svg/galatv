@@ -64,9 +64,10 @@ $email = $_SESSION['email'] ?? '';
   .dias{display:flex;gap:6px;margin:8px 0}
   .dia{width:34px;height:34px;border-radius:50%;border:2px solid #444;color:#666;display:flex;align-items:center;justify-content:center;font-weight:bold;cursor:pointer;font-size:13px;transition:.2s;background:#0a0a0a;user-select:none}
   .dia.on{border-color:#FFD700;color:#FFD700;background:rgba(255,215,0,.15);box-shadow:0 0 8px rgba(255,215,0,.5)}
-  .pane-loading{display:none;text-align:center;padding:40px;color:#c9a94a;font-size:14px}
-  .pane-loading.show{display:block}
-  .spinner{width:38px;height:38px;border:4px solid #333;border-top-color:#FFD700;border-radius:50%;margin:0 auto 14px;animation:spin 0.8s linear infinite}
+  .pane{position:relative}
+  .pane-loading{position:absolute;inset:0;background:#0a0a0a;z-index:5;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;color:#c9a94a;font-size:14px;min-height:200px}
+  .pane-loading.show{display:flex}
+  .spinner{width:38px;height:38px;border:4px solid #333;border-top-color:#FFD700;border-radius:50%;margin-bottom:14px;animation:spin 0.8s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
