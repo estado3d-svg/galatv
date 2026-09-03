@@ -105,16 +105,18 @@ switch ($action) {
         break;
 
     case 'settings_get':
-        $row = $pdo->query('SELECT off_link, off_loop FROM settings WHERE id = 1')->fetch();
-        if (!$row) $row = ['off_link' => '', 'off_loop' => 1];
+        $row = $pdo->query('SELECT off_link, off_loop, carousel_speed, carousel_auto FROM settings WHERE id = 1')->fetch();
+        if (!$row) $row = ['off_link' => '', 'off_loop' => 1, 'carousel_speed' => 3, 'carousel_auto' => 1];
         echo json_encode(['success' => true, 'settings' => $row], JSON_UNESCAPED_UNICODE);
         break;
 
     case 'settings_save':
         $offLink = trim($_POST['off_link'] ?? '');
         $offLoop = (isset($_POST['off_loop']) && $_POST['off_loop'] === '1') ? 1 : 0;
-        $stmt = $pdo->prepare('REPLACE INTO settings (id, off_link, off_loop) VALUES (1, ?, ?)');
-        $stmt->execute([$offLink, $offLoop]);
+        $speed = max(1, min(10, (int)($_POST['carousel_speed'] ?? 3)));
+        $auto = (isset($_POST['carousel_auto']) && $_POST['carousel_auto'] === '1') ? 1 : 0;
+        $stmt = $pdo->prepare('REPLACE INTO settings (id, off_link, off_loop, carousel_speed, carousel_auto) VALUES (1, ?, ?, ?, ?)');
+        $stmt->execute([$offLink, $offLoop, $speed, $auto]);
         echo json_encode(['success' => true]);
         break;
 

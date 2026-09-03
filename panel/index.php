@@ -140,6 +140,21 @@ $email = $_SESSION['email'] ?? '';
     <!-- ===== PESTAÑA: PROGRAMACIÓN ===== -->
     <div class="pane" id="pane-programacion">
       <div class="card">
+        <h2 style="font-size:17px;margin-bottom:15px">Carrusel de programación</h2>
+        <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:center">
+          <div style="flex:1;min-width:220px">
+            <label style="font-size:13px;color:#FFD700;display:block;margin-bottom:6px">Velocidad: <span id="speedVal">3</span> seg</label>
+            <input type="range" id="carSpeed" min="1" max="10" step="1" value="3" style="width:100%;accent-color:#FFD700">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#777"><span>1 seg</span><span>10 seg</span></div>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#ddd;cursor:pointer">
+            <input type="checkbox" id="carAuto" checked style="width:18px;height:18px;accent-color:#FFD700">
+            Movimiento automático
+          </label>
+          <button class="btn" onclick="saveCarousel()">Guardar carrusel</button>
+        </div>
+      </div>
+      <div class="card">
         <h2 style="font-size:17px;margin-bottom:15px">Agregar programa</h2>
         <form id="addPrograma" class="row" style="flex-direction:column;align-items:flex-start">
           <div style="display:flex;gap:10px;width:100%;flex-wrap:wrap;align-items:flex-end">
@@ -400,7 +415,7 @@ loadBanners();
         t.classList.add('active');
         document.getElementById('pane-' + t.dataset.tab).classList.add('active');
         if (t.dataset.tab === 'videoportada') loadSettings();
-        if (t.dataset.tab === 'programacion') loadProgramas();
+        if (t.dataset.tab === 'programacion') { loadProgramas(); loadCarousel(); }
       });
     });
 
@@ -423,6 +438,38 @@ loadBanners();
         d.addEventListener('click', () => d.classList.toggle('on'));
       });
     }
+
+    // ===== Carrusel: velocidad y auto =====
+    async function loadCarousel() {
+      const res = await fetch(API + '?action=settings_get');
+      const data = await res.json();
+      if (!data.success) return;
+      const s = data.settings;
+      document.getElementById('carSpeed').value = s.carousel_speed || 3;
+      document.getElementById('carAuto').checked = parseInt(s.carousel_auto) === 1;
+      document.getElementById('speedVal').textContent = s.carousel_speed || 3;
+    }
+    async function saveCarousel() {
+      const speed = document.getElementById('carSpeed').value;
+      const auto = document.getElementById('carAuto').checked ? '1' : '0';
+      // traer off_link/off_loop existentes para no pisarlos
+      const cur = await (await fetch(API + '?action=settings_get')).json();
+      const s = cur.settings || {};
+      const fd = new FormData();
+      fd.append('action', 'settings_save');
+      fd.append('off_link', s.off_link || '');
+      fd.append('off_loop', s.off_loop || '1');
+      fd.append('carousel_speed', speed);
+      fd.append('carousel_auto', auto);
+      const res = await fetch(API, { method: 'POST', body: fd });
+      const data = await res.json();
+      showMsg(data.success ? 'Carrusel guardado ✓' : 'Error al guardar', data.success ? 'ok' : 'error');
+    }
+    // actualizar el texto de velocidad
+    try {
+      const cs = document.getElementById('carSpeed');
+      if (cs) cs.addEventListener('input', () => { document.getElementById('speedVal').textContent = cs.value; });
+    } catch(e){}
 
     async function loadProgramas() {
       const res = await fetch(API + '?action=programas_list');

@@ -457,6 +457,7 @@
 
         // Aplicar video de portada (settings) y programación
         applySettings(data.settings);
+        window.__settings = data.settings || {};
         loadProgramas(data.programas);
       } catch (e) {
         console.error('Error cargando banners:', e);
@@ -533,7 +534,12 @@
       const cards = track.querySelectorAll('.program-card');
       const count = cards.length;
 
-      // Si son 4 o menos, ocultar flechas y no autoavanzar
+      // Leer config del carrusel desde la BD
+      const s = window.__settings || {};
+      const speedMs = Math.max(1, Math.min(10, parseInt(s.carousel_speed) || 3)) * 1000;
+      const auto = parseInt(s.carousel_auto) === 1;
+
+      // Si son 4 o menos, ocultar flechas
       if (count <= 4) {
         if (prev) prev.classList.add('hidden');
         if (next) next.classList.add('hidden');
@@ -545,7 +551,12 @@
       if (next) next.classList.remove('hidden');
 
       if (carInterval) clearInterval(carInterval);
-      carInterval = setInterval(() => scrollCarousel(1), 3500);
+      // Autoavanzar solo si está activado
+      if (auto) {
+        carInterval = setInterval(() => scrollCarousel(1), speedMs);
+      } else {
+        carInterval = null;
+      }
     }
 
     function scrollCarousel(dir) {
