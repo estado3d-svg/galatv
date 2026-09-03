@@ -1,5 +1,6 @@
 <?php
 // Panel API - Manejo de anuncios y programas
+session_start();
 require_once __DIR__ . '/config.php';
 if (file_exists(__DIR__ . '/config.local.php')) require_once __DIR__ . '/config.local.php';
 require_once __DIR__ . '/db.php';

@@ -1,6 +1,5 @@
 <?php
-require_once __DIR__ . '/session.php';
-$_SESSION = array();
+session_start();
 session_destroy();
 header('Location: index.php');
 exit;

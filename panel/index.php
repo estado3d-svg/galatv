@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/session.php';
+session_start();
 $logged = !empty($_SESSION['logged_in']);
 $email = $_SESSION['email'] ?? '';
 ?>

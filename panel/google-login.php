@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/session.php';
+session_start();
 require_once __DIR__ . '/config.php';
 
 // Generar un estado aleatorio para CSRF
