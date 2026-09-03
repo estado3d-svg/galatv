@@ -60,6 +60,9 @@ $email = $_SESSION['email'] ?? '';
   .programa .info input{width:100%;background:#111;border:1px solid #2c2410;color:#ddd;padding:7px 10px;border-radius:4px;font-size:13px;margin-bottom:6px}
   .programa .info .pf{display:flex;gap:8px}
   .programa .info .pf input{flex:1;margin:0}
+  .dias{display:flex;gap:6px;margin:8px 0}
+  .dia{width:34px;height:34px;border-radius:50%;border:2px solid #444;color:#666;display:flex;align-items:center;justify-content:center;font-weight:bold;cursor:pointer;font-size:13px;transition:.2s;background:#0a0a0a;user-select:none}
+  .dia.on{border-color:#FFD700;color:#FFD700;background:rgba(255,215,0,.15);box-shadow:0 0 8px rgba(255,215,0,.5)}
 </style>
 </head>
 <body>
@@ -137,12 +140,22 @@ $email = $_SESSION['email'] ?? '';
     <div class="pane" id="pane-programacion">
       <div class="card">
         <h2 style="font-size:17px;margin-bottom:15px">Agregar programa</h2>
-        <form id="addPrograma" class="row">
-          <input type="text" id="npTitulo" placeholder="Título (ej: EL HEREDERO)">
-          <input type="text" id="npCategoria" placeholder="Categoría (ej: DRAMA)">
-          <input type="text" id="npDia" placeholder="Día (ej: LUNES)">
-          <input type="text" id="npHora" placeholder="Hora (ej: 20:00)">
-          <input type="text" id="npPosicion" placeholder="Posición (ej: 1)" value="1">
+        <form id="addPrograma" class="row" style="flex-direction:column;align-items:flex-start">
+          <div style="display:flex;gap:10px;width:100%;flex-wrap:wrap">
+            <input type="text" id="npTitulo" placeholder="Título (ej: EL HEREDERO)" style="flex:1;min-width:180px">
+            <input type="text" id="npCategoria" placeholder="Categoría (ej: DRAMA)" style="flex:1;min-width:140px">
+            <input type="text" id="npHora" placeholder="Hora (ej: 20:00)" style="width:110px">
+          </div>
+          <div class="dias" id="npDias">
+            <span class="dia" data-d="D">D</span>
+            <span class="dia" data-d="L">L</span>
+            <span class="dia" data-d="M">M</span>
+            <span class="dia" data-d="M2">M</span>
+            <span class="dia" data-d="J">J</span>
+            <span class="dia" data-d="V">V</span>
+            <span class="dia" data-d="S">S</span>
+          </div>
+          <input type="hidden" id="npDiasVal">
           <button type="submit" class="btn">Agregar</button>
         </form>
       </div>
@@ -379,6 +392,25 @@ loadBanners();
     });
 
     // ===== Programación =====
+    const DIAS = ['D','L','M','M2','J','V','S'];
+
+    function diasStringFromSel(selId) {
+      const vals = [];
+      document.querySelectorAll(`#${selId} .dia.on`).forEach(d => vals.push(d.dataset.d));
+      return vals.join(',');
+    }
+    function setDias(containerId, str) {
+      const on = String(str || '').split(',').map(s => s.trim()).filter(Boolean);
+      document.querySelectorAll(`#${containerId} .dia`).forEach(d => {
+        d.classList.toggle('on', on.includes(d.dataset.d));
+      });
+    }
+    function bindDias(containerId) {
+      document.querySelectorAll(`#${containerId} .dia`).forEach(d => {
+        d.addEventListener('click', () => d.classList.toggle('on'));
+      });
+    }
+
     async function loadProgramas() {
       const res = await fetch(API + '?action=programas_list');
       const data = await res.json();
@@ -391,12 +423,15 @@ loadBanners();
         el.className = 'programa';
         const img = p.imagen ? `<img src="../${p.imagen}" alt="">` : '<img src="" alt="" style="opacity:.2">';
         el.innerHTML = `
+          ${img}
           <div class="info">
             <input data-pid="${p.id}" data-f="titulo" value="${(p.titulo||'').replace(/"/g,'&quot;')}">
             <div class="pf">
               <input data-pid="${p.id}" data-f="categoria" value="${(p.categoria||'').replace(/"/g,'&quot;')}" placeholder="Categoría">
-              <input data-pid="${p.id}" data-f="dia" value="${(p.dia||'').replace(/"/g,'&quot;')}" placeholder="Día">
-              <input data-pid="${p.id}" data-f="hora" value="${(p.hora||'').replace(/"/g,'&quot;')}" placeholder="Hora">
+              <input data-pid="${p.id}" data-f="hora" value="${(p.hora||'').replace(/"/g,'&quot;')}" placeholder="Hora (20:00)">
+            </div>
+            <div class="dias" id="dias-${p.id}">
+              ${DIAS.map(dd => `<span class="dia" data-d="${dd}">${dd === 'M2' ? 'M' : dd}</span>`).join('')}
             </div>
           </div>
           <div class="actions">
@@ -405,6 +440,8 @@ loadBanners();
             <button class="btn btn-danger btn-sm" onclick="delPrograma('${p.id}')">Eliminar</button>
           </div>`;
         list.appendChild(el);
+        setDias('dias-' + p.id, p.dias);
+        bindDias('dias-' + p.id);
       });
     }
 
@@ -415,7 +452,7 @@ loadBanners();
       fd.append('id', id);
       fd.append('titulo', g('titulo'));
       fd.append('categoria', g('categoria'));
-      fd.append('dia', g('dia'));
+      fd.append('dias', diasStringFromSel('dias-' + id));
       fd.append('hora', g('hora'));
       const res = await fetch(API, { method: 'POST', body: fd });
       const data = await res.json();
@@ -459,13 +496,19 @@ loadBanners();
       fd.append('id', 0);
       fd.append('titulo', document.getElementById('npTitulo').value.trim());
       fd.append('categoria', document.getElementById('npCategoria').value.trim());
-      fd.append('dia', document.getElementById('npDia').value.trim());
+      fd.append('dias', diasStringFromSel('npDias'));
       fd.append('hora', document.getElementById('npHora').value.trim());
       const res = await fetch(API, { method: 'POST', body: fd });
       const data = await res.json();
       showMsg(data.success ? 'Programa agregado ✓' : (data.error || 'Error'));
-      if (data.success) { document.getElementById('addPrograma').reset(); loadProgramas(); }
+      if (data.success) {
+        document.getElementById('addPrograma').reset();
+        document.querySelectorAll('#npDias .dia').forEach(d => d.classList.remove('on'));
+        loadProgramas();
+      }
     });
+
+    bindDias('npDias');
 
 // ===== Video de portada =====
 async function loadSettings() {

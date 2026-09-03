@@ -482,13 +482,18 @@
       return m ? m[1] : null;
     }
 
+    const DIAS_NOM = { 'D':'Domingo','L':'Lunes','M':'Martes','M2':'Miércoles','J':'Jueves','V':'Viernes','S':'Sábado' };
+    function diasLabels(str) {
+      if (!str) return '';
+      return String(str).split(',').map(s => s.trim()).filter(Boolean).map(s => DIAS_NOM[s] || s).join(' · ');
+    }
+
     function loadProgramas(programas) {
       const progGrid = document.getElementById('programasGrid');
       if (!progGrid) return;
       progGrid.innerHTML = '';
       const pr = programas || [];
       if (pr.length === 0) {
-        // Si no hay programas, mostrar la card "PRÓXIMAMENTE" de respaldo
         progGrid.innerHTML = `
           <article class="program-card program-card-proximo">
             <div class="thumb"><div class="proximo-box">PRÓXIMAMENTE</div></div>
@@ -503,9 +508,11 @@
         const thumb = hasImg
           ? `<div class="thumb"><img src="${escapeHtml(p.imagen)}" alt=""><span>▶</span></div>`
           : `<div class="thumb"><div class="proximo-box">${escapeHtml(p.titulo)}</div></div>`;
+        const diasTxt = diasLabels(p.dias);
         card.innerHTML = `
           ${thumb}
-          <h4>${escapeHtml(p.titulo)}</h4><small>${escapeHtml(p.categoria)}</small><time>${escapeHtml(p.dia)} ${escapeHtml(p.hora)}</time>`;
+          <h4>${escapeHtml(p.titulo)}</h4><small>${escapeHtml(p.categoria)}</small>
+          <time>${escapeHtml(diasTxt)} ${escapeHtml(p.hora)}</time>`;
         progGrid.appendChild(card);
       });
     }

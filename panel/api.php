@@ -127,16 +127,16 @@ switch ($action) {
         $id = (int)($_POST['id'] ?? 0);
         $titulo = trim($_POST['titulo'] ?? '');
         $categoria = trim($_POST['categoria'] ?? '');
-        $dia = trim($_POST['dia'] ?? '');
+        $dias = trim($_POST['dias'] ?? '');   // letras separadas por coma, ej: "L,M,J"
         $hora = trim($_POST['hora'] ?? '');
         if ($titulo === '') { echo json_encode(['success' => false, 'error' => 'Falta el título']); exit; }
         if ($id > 0) {
-            $stmt = $pdo->prepare('UPDATE programas SET titulo=?, categoria=?, dia=?, hora=? WHERE id=?');
-            $stmt->execute([$titulo, $categoria, $dia, $hora, $id]);
+            $stmt = $pdo->prepare('UPDATE programas SET titulo=?, categoria=?, dias=?, hora=? WHERE id=?');
+            $stmt->execute([$titulo, $categoria, $dias, $hora, $id]);
         } else {
             $maxPos = (int)$pdo->query('SELECT COALESCE(MAX(posicion),0) FROM programas')->fetchColumn();
-            $stmt = $pdo->prepare('INSERT INTO programas (titulo, categoria, dia, hora, posicion) VALUES (?,?,?,?,?)');
-            $stmt->execute([$titulo, $categoria, $dia, $hora, $maxPos + 1]);
+            $stmt = $pdo->prepare('INSERT INTO programas (titulo, categoria, dias, hora, posicion) VALUES (?,?,?,?,?)');
+            $stmt->execute([$titulo, $categoria, $dias, $hora, $maxPos + 1]);
         }
         echo json_encode(['success' => true]);
         break;
