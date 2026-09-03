@@ -143,44 +143,40 @@ function render(banners) {
   list.innerHTML = '';
   const bodies = b => Math.max(1, Math.min(3, parseInt(b.bodies || 1, 10) || 1));
 
-  const section = (title, arr) => {
-    if (!arr.length) return;
-    const box = document.createElement('div');
-    box.innerHTML = `<div style="font-size:13px;color:#FFD700;margin:12px 0 8px">${title}</div>`;
-    arr.forEach(b => {
-      const el = document.createElement('div');
-      el.className = 'banner';
-      el.innerHTML = `
-        <img src="../${b.src}" alt="">
-        <div class="info">
-          <label style="margin-top:6px">Cuerpos (1=333px, 2=666px, 3=999px)</label>
-          <select data-id="${b.id}" data-field="bodies" style="width:100%;background:#111;border:1px solid #2c2410;color:#ddd;padding:7px 10px;border-radius:4px;margin-bottom:8px">
-            <option value="1" ${bodies(b)===1?'selected':''}>1 cuerpo (333px)</option>
-            <option value="2" ${bodies(b)===2?'selected':''}>2 cuerpos (666px)</option>
-            <option value="3" ${bodies(b)===3?'selected':''}>3 cuerpos (999px)</option>
-          </select>
-          <label>Link (dejá vacío para que sea solo imagen)</label>
-          <input data-id="${b.id}" data-field="link" value="${b.link || ''}">
-        </div>
-        <div class="actions">
-          <button class="btn btn-sm" title="Subir" onclick="moveBanner('${b.id}',-1)">▲</button>
-          <button class="btn btn-sm" title="Bajar" onclick="moveBanner('${b.id}',1)">▼</button>
-          <button class="btn btn-sm" onclick="saveChanges('${b.id}')">Guardar</button>
-          <button class="btn btn-ghost btn-sm" onclick="changeImage('${b.id}')">Cambiar imagen</button>
-          <button class="btn btn-danger btn-sm" onclick="del('${b.id}')">Eliminar</button>
-        </div>`;
-      box.appendChild(el);
-    });
-    list.appendChild(box);
-  };
+  if (banners.length === 0) {
+    list.innerHTML = '<div style="color:#777;padding:10px">No hay banners.</div>';
+    return;
+  }
 
-  const one = banners.filter(b => bodies(b) === 1);
-  const two = banners.filter(b => bodies(b) === 2);
-  const three = banners.filter(b => bodies(b) === 3);
-
-  section('Banners de 1 cuerpo (333px)', one);
-  section('Banners de 2 cuerpos (666px)', two);
-  section('Banners de 3 cuerpos (999px)', three);
+  // Mostrar todos en una lista plana en el orden del array
+  const box = document.createElement('div');
+  box.innerHTML = `<div style="font-size:13px;color:#FFD700;margin:0 0 8px">Usá ▲▼ para cambiar el orden (se respeta en la página).</div>`;
+  banners.forEach((b, i) => {
+    const el = document.createElement('div');
+    el.className = 'banner';
+    el.innerHTML = `
+      <img src="../${b.src}" alt="">
+      <div class="info">
+        <div style="font-size:12px;color:#999;margin-bottom:6px">#${i+1} · ${bodies(b)} cuerpo(s) (${bodies(b)*333}px)</div>
+        <label>Cuerpos (1=333px, 2=666px, 3=999px)</label>
+        <select data-id="${b.id}" data-field="bodies" style="width:100%;background:#111;border:1px solid #2c2410;color:#ddd;padding:7px 10px;border-radius:4px;margin-bottom:8px">
+          <option value="1" ${bodies(b)===1?'selected':''}>1 cuerpo (333px)</option>
+          <option value="2" ${bodies(b)===2?'selected':''}>2 cuerpos (666px)</option>
+          <option value="3" ${bodies(b)===3?'selected':''}>3 cuerpos (999px)</option>
+        </select>
+        <label>Link (dejá vacío para que sea solo imagen)</label>
+        <input data-id="${b.id}" data-field="link" value="${b.link || ''}">
+      </div>
+      <div class="actions">
+        <button class="btn btn-sm" title="Subir" onclick="moveBanner('${b.id}',-1)">▲</button>
+        <button class="btn btn-sm" title="Bajar" onclick="moveBanner('${b.id}',1)">▼</button>
+        <button class="btn btn-sm" onclick="saveChanges('${b.id}')">Guardar</button>
+        <button class="btn btn-ghost btn-sm" onclick="changeImage('${b.id}')">Cambiar imagen</button>
+        <button class="btn btn-danger btn-sm" onclick="del('${b.id}')">Eliminar</button>
+      </div>`;
+    box.appendChild(el);
+  });
+  list.appendChild(box);
 }
 
 async function saveChanges(id) {
