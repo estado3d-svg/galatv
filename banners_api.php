@@ -13,8 +13,8 @@ try {
 
     $banners = $pdo->query('SELECT id, src, link, bodies, alt, position FROM banners ORDER BY position ASC, id ASC')->fetchAll();
 
-    $settingsRow = $pdo->query('SELECT off_link, off_loop FROM settings WHERE id = 1')->fetch();
-    if (!$settingsRow) $settingsRow = ['off_link' => '', 'off_loop' => 1];
+    $settingsRow = $pdo->query('SELECT off_link, off_loop, carousel_speed, carousel_auto FROM settings WHERE id = 1')->fetch();
+    if (!$settingsRow) $settingsRow = ['off_link' => '', 'off_loop' => 1, 'carousel_speed' => 3, 'carousel_auto' => 1];
 
     $programas = $pdo->query('SELECT id, titulo, categoria, dias, hora, imagen, posicion FROM programas ORDER BY posicion ASC, id ASC')->fetchAll();
 
