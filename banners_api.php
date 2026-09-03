@@ -16,7 +16,7 @@ try {
     $settingsRow = $pdo->query('SELECT off_link, off_loop FROM settings WHERE id = 1')->fetch();
     if (!$settingsRow) $settingsRow = ['off_link' => '', 'off_loop' => 1];
 
-    $programas = $pdo->query('SELECT id, titulo, categoria, dia, hora, posicion FROM programas ORDER BY posicion ASC, id ASC')->fetchAll();
+    $programas = $pdo->query('SELECT id, titulo, categoria, dia, hora, imagen, posicion FROM programas ORDER BY posicion ASC, id ASC')->fetchAll();
 
     echo json_encode([
         'success'   => true,

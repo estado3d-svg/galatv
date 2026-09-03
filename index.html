@@ -483,20 +483,28 @@
     }
 
     function loadProgramas(programas) {
-      const grid = document.getElementById('cards');
-      if (!grid || !programas) return;
-      // Los programas se insertan ANTES del contenedor de banners.
-      // Como los banners están en un contenedor aparte (#bannersContainer),
-      // reconstruimos las cards de programa dentro del grid original.
-      // Buscar el contenedor de cards de programas reales.
       const progGrid = document.getElementById('programasGrid');
       if (!progGrid) return;
       progGrid.innerHTML = '';
-      programas.forEach(p => {
+      const pr = programas || [];
+      if (pr.length === 0) {
+        // Si no hay programas, mostrar la card "PRÓXIMAMENTE" de respaldo
+        progGrid.innerHTML = `
+          <article class="program-card program-card-proximo">
+            <div class="thumb"><div class="proximo-box">PRÓXIMAMENTE</div></div>
+            <h4>PRÓXIMAMENTE</h4><small>NUEVA SERIE</small>
+          </article>`;
+        return;
+      }
+      pr.forEach(p => {
         const card = document.createElement('article');
         card.className = 'program-card';
+        const hasImg = p.imagen;
+        const thumb = hasImg
+          ? `<div class="thumb"><img src="${escapeHtml(p.imagen)}" alt=""><span>▶</span></div>`
+          : `<div class="thumb"><div class="proximo-box">${escapeHtml(p.titulo)}</div></div>`;
         card.innerHTML = `
-          <div class="thumb"><div class="proximo-box">${escapeHtml(p.titulo)}</div></div>
+          ${thumb}
           <h4>${escapeHtml(p.titulo)}</h4><small>${escapeHtml(p.categoria)}</small><time>${escapeHtml(p.dia)} ${escapeHtml(p.hora)}</time>`;
         progGrid.appendChild(card);
       });

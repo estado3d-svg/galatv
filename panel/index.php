@@ -142,6 +142,7 @@ $email = $_SESSION['email'] ?? '';
           <input type="text" id="npCategoria" placeholder="Categoría (ej: DRAMA)">
           <input type="text" id="npDia" placeholder="Día (ej: LUNES)">
           <input type="text" id="npHora" placeholder="Hora (ej: 20:00)">
+          <input type="text" id="npPosicion" placeholder="Posición (ej: 1)" value="1">
           <button type="submit" class="btn">Agregar</button>
         </form>
       </div>
@@ -365,17 +366,106 @@ document.getElementById('addForm').addEventListener('submit', (e) => {
 
 loadBanners();
 
-// ===== Pestañas =====
-document.querySelectorAll('.tab').forEach(t => {
-  t.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-    document.querySelectorAll('.pane').forEach(x => x.classList.remove('active'));
-    t.classList.add('active');
-    document.getElementById('pane-' + t.dataset.tab).classList.add('active');
-    if (t.dataset.tab === 'videoportada') loadSettings();
-    if (t.dataset.tab === 'programacion') loadProgramas();
-  });
-});
+    // ===== Pestañas =====
+    document.querySelectorAll('.tab').forEach(t => {
+      t.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+        document.querySelectorAll('.pane').forEach(x => x.classList.remove('active'));
+        t.classList.add('active');
+        document.getElementById('pane-' + t.dataset.tab).classList.add('active');
+        if (t.dataset.tab === 'videoportada') loadSettings();
+        if (t.dataset.tab === 'programacion') loadProgramas();
+      });
+    });
+
+    // ===== Programación =====
+    async function loadProgramas() {
+      const res = await fetch(API + '?action=programas_list');
+      const data = await res.json();
+      if (!data.success) return;
+      const list = document.getElementById('programasList');
+      list.innerHTML = '';
+      if (!data.programas.length) { list.innerHTML = '<div style="color:#777">No hay programas.</div>'; return; }
+      data.programas.forEach(p => {
+        const el = document.createElement('div');
+        el.className = 'programa';
+        const img = p.imagen ? `<img src="../${p.imagen}" alt="">` : '<img src="" alt="" style="opacity:.2">';
+        el.innerHTML = `
+          <div class="info">
+            <input data-pid="${p.id}" data-f="titulo" value="${(p.titulo||'').replace(/"/g,'&quot;')}">
+            <div class="pf">
+              <input data-pid="${p.id}" data-f="categoria" value="${(p.categoria||'').replace(/"/g,'&quot;')}" placeholder="Categoría">
+              <input data-pid="${p.id}" data-f="dia" value="${(p.dia||'').replace(/"/g,'&quot;')}" placeholder="Día">
+              <input data-pid="${p.id}" data-f="hora" value="${(p.hora||'').replace(/"/g,'&quot;')}" placeholder="Hora">
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-sm" onclick="savePrograma('${p.id}')">Guardar</button>
+            <button class="btn btn-ghost btn-sm" onclick="changeProgramaImage('${p.id}')">Imagen</button>
+            <button class="btn btn-danger btn-sm" onclick="delPrograma('${p.id}')">Eliminar</button>
+          </div>`;
+        list.appendChild(el);
+      });
+    }
+
+    async function savePrograma(id) {
+      const g = f => document.querySelector(`input[data-pid="${id}"][data-f="${f}"]`).value.trim();
+      const fd = new FormData();
+      fd.append('action', 'programas_save');
+      fd.append('id', id);
+      fd.append('titulo', g('titulo'));
+      fd.append('categoria', g('categoria'));
+      fd.append('dia', g('dia'));
+      fd.append('hora', g('hora'));
+      const res = await fetch(API, { method: 'POST', body: fd });
+      const data = await res.json();
+      showMsg(data.success ? 'Programa guardado ✓' : (data.error || 'Error'));
+      loadProgramas();
+    }
+
+    async function delPrograma(id) {
+      if (!confirm('¿Eliminar este programa?')) return;
+      const fd = new FormData();
+      fd.append('action', 'programas_delete');
+      fd.append('id', id);
+      const res = await fetch(API, { method: 'POST', body: fd });
+      const data = await res.json();
+      showMsg(data.success ? 'Programa eliminado ✓' : 'Error');
+      loadProgramas();
+    }
+
+    function changeProgramaImage(id) {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.gif,.png,.jpg,.jpeg,.webp';
+      input.onchange = () => {
+        const fd = new FormData();
+        fd.append('action', 'programas_image');
+        fd.append('id', id);
+        fd.append('file', input.files[0]);
+        uploadWithProgress(fd, data => {
+          showMsg(data.success ? 'Imagen actualizada ✓' : (data.error || 'Error'));
+          loadProgramas();
+          hideLoading();
+        });
+      };
+      input.click();
+    }
+
+    document.getElementById('addPrograma').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData();
+      fd.append('action', 'programas_save');
+      fd.append('id', 0);
+      fd.append('titulo', document.getElementById('npTitulo').value.trim());
+      fd.append('categoria', document.getElementById('npCategoria').value.trim());
+      fd.append('dia', document.getElementById('npDia').value.trim());
+      fd.append('hora', document.getElementById('npHora').value.trim());
+      const res = await fetch(API, { method: 'POST', body: fd });
+      const data = await res.json();
+      showMsg(data.success ? 'Programa agregado ✓' : (data.error || 'Error'));
+      if (data.success) { document.getElementById('addPrograma').reset(); loadProgramas(); }
+    });
 
 // ===== Video de portada =====
 async function loadSettings() {
@@ -433,6 +523,7 @@ async function savePrograma(id) {
   fd.append('categoria', g('categoria'));
   fd.append('dia', g('dia'));
   fd.append('hora', g('hora'));
+  fd.append('posicion', g('posicion') || '1');
   const res = await fetch(API, { method: 'POST', body: fd });
   const data = await res.json();
   showMsg(data.success ? 'Programa guardado ✓' : (data.error || 'Error'));
