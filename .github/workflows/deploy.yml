@@ -17,6 +17,7 @@ jobs:
           mkdir -p /tmp/deploy
           # banners.json NO se sube: lo administra el panel y vive solo en el servidor
           rsync -a --exclude='.git' --exclude='.github' --exclude='node_modules' --exclude='.gitignore' --exclude='*.log' --exclude='banners.json' ./ /tmp/deploy/
+          # GalaTV-API/ contiene los endpoints que la app Android consume (api/estado3.php, etc.)
           echo "=== Archivos a subir ==="
           find /tmp/deploy -type f | sort
           echo "=== Cantidad: ==="
