@@ -1,5 +1,5 @@
-# Proteger archivos sensibles del panel
-<FilesMatch "^(config\.php|config\.local\.php|\.htaccess)$">
+# Proteger archivos internos del panel (no accesibles directamente)
+<FilesMatch "^(config\.php|config\.local\.php|db\.php|session\.php|\.htaccess)$">
   Order Allow,Deny
   Deny from all
 </FilesMatch>

@@ -25,5 +25,6 @@ try {
         'programas' => $programas
     ], JSON_UNESCAPED_UNICODE);
 } catch (Exception $e) {
-    echo json_encode(['success' => false, 'banners' => [], 'settings' => [], 'programas' => [], 'error' => $e->getMessage()]);
+    // NO exponer detalles del error al público
+    echo json_encode(['success' => false, 'banners' => [], 'settings' => [], 'programas' => [], 'error' => 'Error interno']);
 }

@@ -10,6 +10,13 @@ if (empty($_SESSION['logged_in'])) {
     echo json_encode(['success' => false, 'error' => 'No autorizado']);
     exit;
 }
+// Normalizar lista permitida (soporta constante o variable según versión)
+$allowed = defined('ALLOWED_USERS') ? ALLOWED_USERS : (isset($ALLOWED_USERS) ? $ALLOWED_USERS : []);
+if (!in_array($_SESSION['email'], $allowed)) {
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'error' => 'No autorizado']);
+    exit;
+}
 
 header('Content-Type: application/json; charset=UTF-8');
 

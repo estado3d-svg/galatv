@@ -60,6 +60,7 @@ if (!in_array(strtolower($googleEmail), array_map('strtolower', $ALLOWED_USERS))
 }
 
 // Login exitoso
+session_regenerate_id(true);
 $_SESSION['logged_in']  = true;
 $_SESSION['email']      = $googleEmail;
 $_SESSION['name']       = $googleName;
