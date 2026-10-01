@@ -1,11 +1,3 @@
-<?php
-/**
- * GalaTV API - .htaccess para URL amigables
- * Permite usar /api/estado en lugar de /api/estado.php
- *
- * Subir este archivo a: galatv.com.ar/api/.htaccess
- */
-
 RewriteEngine On
 
 # /api/estado -> estado.php
@@ -15,4 +7,7 @@ RewriteRule ^estado/?$ estado.php [L,QSA]
 RewriteRule ^programacion/?$ programacion.php [L,QSA]
 
 # Bloquear acceso directo a config.php
-RewriteRule ^config\.php$ - [F,L]
+<Files "config.php">
+    Order Allow,Deny
+    Deny from all
+</Files>
